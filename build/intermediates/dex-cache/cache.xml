@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items version="2" >
+
+    <item
+        is-multidex="false"
+        jar="C:\Android\Git\Weather\app\build\intermediates\exploded-aar\com.android.support\appcompat-v7\24.1.1\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="24.0.2"
+        sha1="1256c10604bb098490eab070d76754ac5ceab35c">
+        <dex dex="C:\Android\Git\Weather\app\build\intermediates\pre-dexed\debug\com.android.support-appcompat-v7-24.1.1_be0a876781ea46bc9ead55c376cb2205a3bcba01.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Android\sdk\extras\android\m2repository\com\android\support\support-annotations\24.1.1\support-annotations-24.1.1.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="24.0.2"
+        sha1="3af19f153122737b372622fa6c81dd11a1c6b999">
+        <dex dex="C:\Android\Git\Weather\app\build\intermediates\pre-dexed\debug\support-annotations-24.1.1_094d634603cfbcbfa7291b5e459ff765ff06345b.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\Yining Huang\.gradle\caches\modules-2\files-2.1\io.reactivex\rxjava\1.2.0\42bfaf64c94f3848ebf5cf1c2ea4ec9d1b3ac6c8\rxjava-1.2.0.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="24.0.2"
+        sha1="42bfaf64c94f3848ebf5cf1c2ea4ec9d1b3ac6c8">
+        <dex dex="C:\Android\Git\Weather\app\build\intermediates\pre-dexed\debug\rxjava-1.2.0_ab9943789df06af5b71de3bcab3a5be5b384ecf2.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Android\Git\Weather\app\build\intermediates\exploded-aar\com.android.support\support-v4\24.1.1\jars\libs\internal_impl-24.1.1.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="24.0.2"
+        sha1="f78c2f395cb096f9dc1dc07e729922b8fcd3c4f5">
+        <dex dex="C:\Android\Git\Weather\app\build\intermediates\pre-dexed\debug\internal_impl-24.1.1_d544015d15e5914e43ac09ddecc32cf9a2c3ad48.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\Yining Huang\.gradle\caches\modules-2\files-2.1\com.squareup.okio\okio\1.9.0\f824591a0016efbaeddb8300bee54832a1398cfa\okio-1.9.0.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="24.0.2"
+        sha1="f824591a0016efbaeddb8300bee54832a1398cfa">
+        <dex dex="C:\Android\Git\Weather\app\build\intermediates\pre-dexed\debug\okio-1.9.0_0653cf0343fb7a2998bc09b3036312ea5e80833f.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\Yining Huang\.gradle\caches\modules-2\files-2.1\com.squareup.okhttp3\okhttp\3.4.1\c7c4f9e35c2fd5900da24f9872e3971801f08ce0\okhttp-3.4.1.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="24.0.2"
+        sha1="c7c4f9e35c2fd5900da24f9872e3971801f08ce0">
+        <dex dex="C:\Android\Git\Weather\app\build\intermediates\pre-dexed\debug\okhttp-3.4.1_bb450d28a90d7564a74beed35b4971a905727f64.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Android\Git\Weather\app\build\intermediates\exploded-aar\io.reactivex\rxandroid\1.2.1\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="24.0.2"
+        sha1="5a2386ad9bfff580b206a7fe305cdccd00798159">
+        <dex dex="C:\Android\Git\Weather\app\build\intermediates\pre-dexed\debug\io.reactivex-rxandroid-1.2.1_ea220d4ef418143a3131aec878c87f76706fab8c.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Android\Git\Weather\app\build\intermediates\exploded-aar\com.android.support\animated-vector-drawable\24.1.1\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="24.0.2"
+        sha1="c936c1bd42f0c018c18920c7bec619ef056b24f8">
+        <dex dex="C:\Android\Git\Weather\app\build\intermediates\pre-dexed\debug\com.android.support-animated-vector-drawable-24.1.1_404241c4946fc09bfe1cee0e0bd019baf0ded99f.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Android\Git\Weather\app\build\intermediates\exploded-aar\com.android.support\support-v4\24.1.1\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="24.0.2"
+        sha1="6d7d803871e3203465f71a163e7af104f807b446">
+        <dex dex="C:\Android\Git\Weather\app\build\intermediates\pre-dexed\debug\com.android.support-support-v4-24.1.1_2f9fb1645753e643a0958eb6ee302451ef637cab.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Android\Git\Weather\app\build\intermediates\exploded-aar\com.android.support\support-vector-drawable\24.1.1\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="24.0.2"
+        sha1="f62e763609f65e47dc6c498760a4accf02776788">
+        <dex dex="C:\Android\Git\Weather\app\build\intermediates\pre-dexed\debug\com.android.support-support-vector-drawable-24.1.1_b234b5ec9996b4c4e9549875949d268bf21b9e86.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\Yining Huang\.gradle\caches\modules-2\files-2.1\com.squareup.retrofit2\retrofit\2.1.0\2de7cd8b95b7021b1d597f049bcb422055119f2c\retrofit-2.1.0.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="24.0.2"
+        sha1="2de7cd8b95b7021b1d597f049bcb422055119f2c">
+        <dex dex="C:\Android\Git\Weather\app\build\intermediates\pre-dexed\debug\retrofit-2.1.0_94a8eca4d9eb9edb40d76cc2fb613b304d186a86.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\Yining Huang\.gradle\caches\modules-2\files-2.1\com.squareup.picasso\picasso\2.5.2\7446d06ec8d4f7ffcc53f1da37c95f200dcb9387\picasso-2.5.2.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="24.0.2"
+        sha1="7446d06ec8d4f7ffcc53f1da37c95f200dcb9387">
+        <dex dex="C:\Android\Git\Weather\app\build\intermediates\pre-dexed\debug\picasso-2.5.2_c1d77903d5b0f934e67480ffbe191ac480b8f85a.jar" />
+    </item>
+
+</items>
