@@ -1,9 +1,9 @@
 package com.example.yininghuang.weather;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 
-import retrofit2.Retrofit;
+import com.example.yininghuang.weather.utils.SharedPrefrencesHelper;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -11,6 +11,15 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        LocationService.getInstance(this);
+
+        if (getSupportFragmentManager().findFragmentById(R.id.mainFrameLayout) == null) {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.mainFrameLayout, WeatherFragment.newInstance())
+                    .commit();
+        }
+
+        SharedPrefrencesHelper.setValue(1);
+        SharedPrefrencesHelper.setValue(1L);
+        SharedPrefrencesHelper.setValue(true);
     }
 }
