@@ -6,15 +6,21 @@ package com.example.yininghuang.weather.net;
 
 public class Constants {
 
-    private static final String key = "41cb48fa8c78499dbe18697c895456f2";
+    private static final String KEY = "41cb48fa8c78499dbe18697c895456f2";
 
-    private static final String baseUrl = "https://api.heweather.com";
+    private static final String BASE_URL = "https://api.heweather.com";
+
+    private static final int CITY_COUNT = 2567;
 
     public static String getKey() {
-        return key;
+        return KEY;
     }
 
     public static String getBaseUrl() {
-        return baseUrl;
+        return BASE_URL;
+    }
+
+    public static int getCityCount() {
+        return CITY_COUNT;
     }
 }
