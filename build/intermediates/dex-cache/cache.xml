@@ -21,6 +21,15 @@
     </item>
     <item
         is-multidex="false"
+        jar="C:\Android\Git\Weather\app\build\intermediates\exploded-aar\com.android.support\design\24.1.1\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="24.0.2"
+        sha1="e195bd694d5389acfba27ff4fdfa64c4c65b2c05">
+        <dex dex="C:\Android\Git\Weather\app\build\intermediates\pre-dexed\debug\com.android.support-design-24.1.1_329f1b1f4008eeef6c3af4908eeca1f09ad40f1e.jar" />
+    </item>
+    <item
+        is-multidex="false"
         jar="C:\Users\Yining Huang\.gradle\caches\modules-2\files-2.1\com.squareup.okio\okio\1.9.0\f824591a0016efbaeddb8300bee54832a1398cfa\okio-1.9.0.jar"
         jumboMode="false"
         optimize="true"
@@ -36,6 +45,15 @@
         revision="24.0.2"
         sha1="aa557d71ead91cbf26e0c316a0f593d168303309">
         <dex dex="C:\Android\Git\Weather\app\build\intermediates\pre-dexed\debug\converter-gson-2.1.0_a997f86c41c5e2f298d1217be628488eea0f3028.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Android\Git\Weather\app\build\intermediates\exploded-aar\com.android.support\recyclerview-v7\24.1.1\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="24.0.2"
+        sha1="787871951412550519b0222aba3c9df4cea49875">
+        <dex dex="C:\Android\Git\Weather\app\build\intermediates\pre-dexed\debug\com.android.support-recyclerview-v7-24.1.1_4264a64ffe7ad986c46d365f73049d99886760b4.jar" />
     </item>
     <item
         is-multidex="false"

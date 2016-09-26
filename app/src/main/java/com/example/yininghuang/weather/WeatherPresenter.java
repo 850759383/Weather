@@ -14,7 +14,6 @@ import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -51,7 +50,7 @@ public class WeatherPresenter implements WeatherContract.Presenter {
             WeatherList.Weather cache = loadFromCache(name);
             if (cache != null)
                 weatherView.updateWeather(cache);
-        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         } finally {
             fetchWeather(name);
@@ -111,25 +110,22 @@ public class WeatherPresenter implements WeatherContract.Presenter {
 
     private void saveToCache(WeatherList.Weather weather) throws IOException {
         File file = new File(cacheDir, weather.getBasicCityInfo().getCityName());
-        if (!file.exists()) {
+        if (!file.exists())
             file.createNewFile();
-        }
+
         FileOutputStream fos = new FileOutputStream(file, false);
         fos.write(new Gson().toJson(weather).getBytes());
         fos.close();
     }
 
-    private WeatherList.Weather loadFromCache(String cityName) throws FileNotFoundException {
+    private WeatherList.Weather loadFromCache(String cityName) throws IOException {
         String name = formatCityName(cityName);
         if (TextUtils.isEmpty(name))
             return null;
 
         File file = new File(cacheDir, cityName);
-        if (file.exists()) {
-            JsonReader reader = new JsonReader(new FileReader(file));
-            return new Gson().fromJson(reader, WeatherList.Weather.class);
-        }
-        return null;
+        JsonReader reader = new JsonReader(new FileReader(file));
+        return new Gson().fromJson(reader, WeatherList.Weather.class);
     }
 
     @Override

@@ -12,6 +12,8 @@ public class Constants {
 
     private static final int CITY_COUNT = 2567;
 
+    private static final char DEGREE_SYMBOL = 0x00B0;
+
     public static String getKey() {
         return KEY;
     }
@@ -23,4 +25,14 @@ public class Constants {
     public static int getCityCount() {
         return CITY_COUNT;
     }
+
+    public static String getWeatherImage(String weatherCode) {
+        return "http://files.heweather.com/cond_icon/" + weatherCode + ".png";
+    }
+
+    public static char getDegreeSymbol() {
+        return DEGREE_SYMBOL;
+    }
+
+
 }
