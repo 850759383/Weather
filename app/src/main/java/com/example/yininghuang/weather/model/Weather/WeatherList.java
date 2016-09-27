@@ -32,6 +32,17 @@ public class WeatherList {
         @SerializedName("now")
         private NowWeather nowWeather;
 
+        @SerializedName("aqi")
+        private AirQuality airQuality;
+
+        public AirQuality getAirQuality() {
+            return airQuality;
+        }
+
+        public void setAirQuality(AirQuality airQuality) {
+            this.airQuality = airQuality;
+        }
+
         public BasicCityInfo getBasicCityInfo() {
             return basicCityInfo;
         }

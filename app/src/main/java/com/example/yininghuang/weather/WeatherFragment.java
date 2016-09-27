@@ -11,6 +11,7 @@ import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -19,6 +20,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.yininghuang.weather.model.Weather.DailyForecast;
 import com.example.yininghuang.weather.model.Weather.WeatherList;
@@ -29,28 +31,36 @@ import com.squareup.picasso.Picasso;
 
 import java.util.Date;
 
+import rx.functions.Action1;
+
 public class WeatherFragment extends Fragment implements WeatherContract.View, LocationListener {
 
     private WeatherPresenter presenter;
 
+    private TextView title;
     private ImageView weatherImage;
     private TextView weatherText;
     private TextView updateTimeText;
     private TextView maxTemp;
     private TextView minTemp;
     private TextView currentTemp;
+    private TextView feelTemp;
+    private TextView humidity;
+    private TextView windSpeed;
+    private TextView airQuality;
+    private SwipeRefreshLayout swipeRefreshLayout;
 
-    private TextView date1;
-    private ImageView image1;
-    private TextView temp1;
+    private TextView forecastDate1;
+    private ImageView forecastImage1;
+    private TextView forecastTemp1;
 
-    private TextView date2;
-    private ImageView image2;
-    private TextView temp2;
+    private TextView forecastDate2;
+    private ImageView forecastImage2;
+    private TextView forecastTemp2;
 
-    private TextView date3;
-    private ImageView image3;
-    private TextView temp3;
+    private TextView forecastDate3;
+    private ImageView forecastImage3;
+    private TextView forecastTemp3;
 
     private String latestLocation;
     public static final String PREFERENCE_LOCATION = "location";
@@ -82,31 +92,48 @@ public class WeatherFragment extends Fragment implements WeatherContract.View, L
 
     private void initView(View view) {
         setHasOptionsMenu(true);
+        title = (TextView) view.findViewById(R.id.cityTitle);
         weatherImage = (ImageView) view.findViewById(R.id.weatherImage);
         weatherText = (TextView) view.findViewById(R.id.weatherText);
         updateTimeText = (TextView) view.findViewById(R.id.updateTime);
         currentTemp = (TextView) view.findViewById(R.id.currentTemp);
         maxTemp = (TextView) view.findViewById(R.id.maxTemp);
         minTemp = (TextView) view.findViewById(R.id.minTemp);
-        date1 = (TextView) view.findViewById(R.id.date1);
-        image1 = (ImageView) view.findViewById(R.id.date1Image);
-        temp1 = (TextView) view.findViewById(R.id.date1Temp);
-        date2 = (TextView) view.findViewById(R.id.date2);
-        image2 = (ImageView) view.findViewById(R.id.date2Image);
-        temp2 = (TextView) view.findViewById(R.id.date2Temp);
-        date3 = (TextView) view.findViewById(R.id.date3);
-        image3 = (ImageView) view.findViewById(R.id.date3Image);
-        temp3 = (TextView) view.findViewById(R.id.date3Temp);
+        forecastDate1 = (TextView) view.findViewById(R.id.date1);
+        forecastImage1 = (ImageView) view.findViewById(R.id.date1Image);
+        forecastTemp1 = (TextView) view.findViewById(R.id.date1Temp);
+        forecastDate2 = (TextView) view.findViewById(R.id.date2);
+        forecastImage2 = (ImageView) view.findViewById(R.id.date2Image);
+        forecastTemp2 = (TextView) view.findViewById(R.id.date2Temp);
+        forecastDate3 = (TextView) view.findViewById(R.id.date3);
+        forecastImage3 = (ImageView) view.findViewById(R.id.date3Image);
+        forecastTemp3 = (TextView) view.findViewById(R.id.date3Temp);
+        feelTemp = (TextView) view.findViewById(R.id.feelTemp);
+        humidity = (TextView) view.findViewById(R.id.humidity);
+        airQuality = (TextView) view.findViewById(R.id.airQuality);
+        windSpeed = (TextView) view.findViewById(R.id.windSpeed);
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
         ((MainActivity) getActivity()).setSupportActionBar(toolbar);
+
         presenter = new WeatherPresenter(this, getActivity());
         locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
         latestLocation = SharedPreferenceHelper.getStringPreference(getActivity(), PREFERENCE_LOCATION);
+        swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipeRefreshLayout);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                requestLocation();
+            }
+        });
+
 
         if (latestLocation != null) {
             presenter.init(latestLocation);
         }
+        requestLocation();
+    }
 
+    private void requestLocation() {
         if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             locationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, WeatherFragment.this, Looper.getMainLooper());
         }
@@ -114,6 +141,7 @@ public class WeatherFragment extends Fragment implements WeatherContract.View, L
 
     @Override
     public void updateWeather(WeatherList.Weather weather) {
+        title.setText(weather.getBasicCityInfo().getCityName());
         Date time = DateFormat.getTime(weather.getBasicCityInfo().getUpdateTime().getLocalTime());
         if (time != null) {
             updateTimeText.setText("更新时间：" + DateFormat.format(time));
@@ -125,29 +153,48 @@ public class WeatherFragment extends Fragment implements WeatherContract.View, L
         weatherText.setText(weather.getNowWeather().getWeatherStatus().getWeatherName());
         String code = weather.getNowWeather().getWeatherStatus().getWeatherCode();
         Picasso.with(getActivity())
-                .load(Constants.getWeatherImage(code))
+                .load(Constants.getWeatherImage(code, getActivity()))
                 .fit()
                 .centerInside()
                 .into(weatherImage);
+        feelTemp.setText("体感温度：" + weather.getNowWeather().getFeelTemperature() + Constants.getDegreeSymbol());
+        humidity.setText(weather.getNowWeather().getHumidity() + "%");
+        airQuality.setText(weather.getAirQuality().getCity().getQlty());
+        windSpeed.setText(weather.getNowWeather().getWind().getSpeed() + "km/h");
         setUpDailyForeCast(weather);
     }
 
     private void setUpDailyForeCast(WeatherList.Weather weather) {
-        DailyForecast day1 = weather.getDailyForecasts().get(1);
-        DailyForecast day2 = weather.getDailyForecasts().get(2);
-        DailyForecast day3 = weather.getDailyForecasts().get(3);
+        DailyForecast forecast1 = weather.getDailyForecasts().get(1);
+        DailyForecast forecast2 = weather.getDailyForecasts().get(2);
+        DailyForecast forecast3 = weather.getDailyForecasts().get(3);
 
-        Picasso.with(getActivity()).load(Constants.getWeatherImage(day1.getWeatherStatus().getWeatherCodeDay())).fit().centerCrop().into(image1);
-        Picasso.with(getActivity()).load(Constants.getWeatherImage(day2.getWeatherStatus().getWeatherCodeDay())).fit().centerCrop().into(image2);
-        Picasso.with(getActivity()).load(Constants.getWeatherImage(day3.getWeatherStatus().getWeatherCodeDay())).fit().centerCrop().into(image3);
+        Picasso.with(getActivity()).load(Constants.getWeatherImage(forecast1.getWeatherStatus().getWeatherCodeDay(), getActivity()))
+                .fit()
+                .centerCrop()
+                .into(forecastImage1);
 
-        temp1.setText(day1.getTemperature().getMaxTemperature() + "/" + day1.getTemperature().getMinTemperature());
-        temp2.setText(day2.getTemperature().getMaxTemperature() + "/" + day2.getTemperature().getMinTemperature());
-        temp3.setText(day3.getTemperature().getMaxTemperature() + "/" + day3.getTemperature().getMinTemperature());
+        Picasso.with(getActivity()).load(Constants.getWeatherImage(forecast2.getWeatherStatus().getWeatherCodeDay(), getActivity()))
+                .fit()
+                .centerCrop().
+                into(forecastImage2);
 
-        date1.setText(DateFormat.getWeekOfYear(DateFormat.getTime2(day1.getDate())));
-        date2.setText(DateFormat.getWeekOfYear(DateFormat.getTime2(day2.getDate())));
-        date3.setText(DateFormat.getWeekOfYear(DateFormat.getTime2(day3.getDate())));
+        Picasso.with(getActivity()).load(Constants.getWeatherImage(forecast3.getWeatherStatus().getWeatherCodeDay(), getActivity()))
+                .fit()
+                .centerCrop()
+                .into(forecastImage3);
+
+        forecastTemp1.setText(forecast1.getTemperature().getMaxTemperature() + Constants.getDegreeSymbol() + "/"
+                + forecast1.getTemperature().getMinTemperature() + Constants.getDegreeSymbol());
+
+        forecastTemp2.setText(forecast2.getTemperature().getMaxTemperature() + Constants.getDegreeSymbol() + "/"
+                + forecast2.getTemperature().getMinTemperature() + Constants.getDegreeSymbol());
+        forecastTemp3.setText(forecast3.getTemperature().getMaxTemperature() + Constants.getDegreeSymbol() + "/"
+                + forecast3.getTemperature().getMinTemperature() + Constants.getDegreeSymbol());
+
+        forecastDate1.setText(DateFormat.getWeekOfYear(DateFormat.getTime2(forecast1.getDate())));
+        forecastDate2.setText(DateFormat.getWeekOfYear(DateFormat.getTime2(forecast2.getDate())));
+        forecastDate3.setText(DateFormat.getWeekOfYear(DateFormat.getTime2(forecast3.getDate())));
 
     }
 
@@ -160,9 +207,6 @@ public class WeatherFragment extends Fragment implements WeatherContract.View, L
     @Override
     public void onResume() {
         super.onResume();
-        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000 * 60, 0, this);
-        }
     }
 
     @Override
@@ -182,11 +226,32 @@ public class WeatherFragment extends Fragment implements WeatherContract.View, L
     @Override
     public void onLocationChanged(Location location) {
         System.out.println("更新位置");
-        String name = presenter.getCityName(location);
-        if (name != null && !name.equals(latestLocation)) {
-            presenter.fetchWeather(name);
-            SharedPreferenceHelper.setStringPreference(getActivity(), PREFERENCE_LOCATION, name);
-        }
+        presenter.getCityName(location).subscribe(new Action1<String>() {
+            @Override
+            public void call(String s) {
+                if (s != null) {
+                    presenter.fetchWeather(s);
+                    SharedPreferenceHelper.setStringPreference(getActivity(), PREFERENCE_LOCATION, s);
+                }
+            }
+        }, new Action1<Throwable>() {
+            @Override
+            public void call(Throwable throwable) {
+                throwable.printStackTrace();
+                setRefresh(false);
+                Toast.makeText(getActivity().getApplicationContext(), "地理位置解析失败", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    @Override
+    public void setRefresh(final Boolean status) {
+        swipeRefreshLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                swipeRefreshLayout.setRefreshing(status);
+            }
+        });
     }
 
     @Override

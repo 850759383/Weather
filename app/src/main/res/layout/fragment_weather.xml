@@ -1,214 +1,299 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/swipeRefreshLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    tools:context="com.example.yininghuang.weather.WeatherFragment">
+    tools:context="com.example.yininghuang.weather.WeatherFragment"
+    android:fitsSystemWindows="true">
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        app:navigationIcon="@drawable/ic_menu_white_24dp">
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        >
 
-        <TextView
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="宁波市"
-            android:textAppearance="@style/TextAppearance.AppCompat.Title" />
-    </android.support.v7.widget.Toolbar>
+            android:layout_height="wrap_content">
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                app:navigationIcon="@drawable/ic_menu_white_24dp">
+
+                <TextView
+                    android:id="@+id/cityTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="16dp"
+                    android:gravity="center"
+                    android:text="N/A"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Title" />
+            </android.support.v7.widget.Toolbar>
+
+            <TextView
+                android:id="@+id/currentTemp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/toolbar"
+                android:layout_centerHorizontal="true"
+                android:text="N/A"
+                android:textSize="72sp"
+                android:typeface="normal" />
+
+            <TextView
+                android:id="@+id/degree"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@id/currentTemp"
+                android:layout_toRightOf="@id/currentTemp"
+                android:text="\u00B0"
+                android:textSize="72sp"
+                android:typeface="normal" />
 
 
-    <TextView
-        android:id="@+id/updateTime"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:padding="8dp"
-        android:textAppearance="@style/Base.TextAppearance.AppCompat.Caption" />
+            <ImageView
+                android:id="@+id/weatherImage"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_below="@+id/toolbar"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="24dp"
+                android:layout_toStartOf="@+id/currentTemp"
+                android:padding="8dp" />
 
-    <TextView
-        android:id="@+id/currentTemp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/toolbar"
-        android:layout_centerHorizontal="true"
-        android:text="50"
-        android:textSize="72sp"
-        android:typeface="normal" />
+            <TextView
+                android:id="@+id/weatherText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/currentTemp"
+                android:layout_centerHorizontal="true"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
-    <TextView
-        android:id="@+id/degree"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@id/currentTemp"
-        android:layout_toRightOf="@id/currentTemp"
-        android:text="\u00B0"
-        android:textSize="72sp"
-        android:typeface="normal" />
+            <TextView
+                android:id="@+id/feelTemp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/weatherText"
+                android:layout_centerHorizontal="true"
+                android:paddingTop="8dp" />
+
+            <TextView
+                android:id="@+id/maxTemp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@id/currentTemp"
+                android:layout_marginTop="24dp"
+                android:layout_toRightOf="@id/degree"
+                android:padding="4dp" />
+
+            <TextView
+                android:id="@+id/minTemp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignStart="@id/maxTemp"
+                android:layout_below="@id/maxTemp"
+                android:paddingBottom="4dp"
+                android:paddingLeft="4dp"
+                android:paddingRight="4dp" />
+
+            <LinearLayout
+                android:id="@+id/other"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/feelTemp"
+                android:orientation="horizontal"
+                android:paddingBottom="8dp"
+                android:paddingTop="16dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:text="湿度" />
+
+                    <TextView
+                        android:id="@+id/humidity"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center_horizontal" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:text="空气质量" />
+
+                    <TextView
+                        android:id="@+id/airQuality"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center_horizontal" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:text="风速" />
+
+                    <TextView
+                        android:id="@+id/windSpeed"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center_horizontal" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <RelativeLayout
+                android:id="@+id/forecast1"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_below="@+id/other"
+                android:layout_marginTop="16dp"
+                android:background="#70737373">
+
+                <TextView
+                    android:id="@+id/date1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:padding="8dp"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+
+                <TextView
+                    android:id="@+id/date1Temp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:padding="8dp"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+
+                <ImageView
+                    android:id="@+id/date1Image"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_centerVertical="true"
+                    android:layout_toLeftOf="@+id/date1Temp"
+                    android:padding="8dp" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/forecast2"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_below="@+id/forecast1"
+                android:layout_marginTop="16dp"
+                android:background="#70737373">
+
+                <TextView
+                    android:id="@+id/date2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:padding="8dp"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+
+                <TextView
+                    android:id="@+id/date2Temp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:padding="8dp"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+
+                <ImageView
+                    android:id="@+id/date2Image"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_centerVertical="true"
+                    android:layout_toLeftOf="@+id/date2Temp"
+                    android:padding="8dp" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/forecast3"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_below="@+id/forecast2"
+                android:layout_marginTop="16dp"
+                android:background="#70737373">
+
+                <TextView
+                    android:id="@+id/date3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:padding="8dp"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+
+                <TextView
+                    android:id="@+id/date3Temp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:padding="8dp"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+
+                <ImageView
+                    android:id="@+id/date3Image"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_centerVertical="true"
+                    android:layout_toLeftOf="@+id/date3Temp"
+                    android:padding="8dp" />
+
+            </RelativeLayout>
+
+            <TextView
+                android:id="@+id/updateTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentRight="true"
+                android:padding="8dp"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Caption" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true"
+                android:padding="8dp"
+                android:text="数据来源：heweather.com"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Caption" />
+
+        </RelativeLayout>
+    </ScrollView>
+</android.support.v4.widget.SwipeRefreshLayout>
 
 
-    <ImageView
-        android:id="@+id/weatherImage"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_below="@+id/toolbar"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="16dp"
-        android:layout_toStartOf="@+id/currentTemp"
-        android:padding="8dp" />
-
-    <TextView
-        android:id="@+id/weatherText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/currentTemp"
-        android:layout_centerHorizontal="true"
-        android:text="多云"
-        android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
-
-    <TextView
-        android:id="@+id/maxTemp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@id/currentTemp"
-        android:layout_marginTop="24dp"
-        android:layout_toRightOf="@id/degree"
-        android:padding="4dp"
-        android:text="56\u00B0" />
-
-    <TextView
-        android:id="@+id/minTemp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignStart="@id/maxTemp"
-        android:layout_below="@id/maxTemp"
-        android:paddingBottom="4dp"
-        android:paddingLeft="4dp"
-        android:paddingRight="4dp"
-        android:text="30\u00B0" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:padding="8dp"
-        android:text="数据来源：heweather.com"
-        android:textAppearance="@style/Base.TextAppearance.AppCompat.Caption" />
-
-    <RelativeLayout
-        android:id="@+id/forecast1"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_below="@+id/weatherText"
-        android:layout_marginTop="16dp"
-        android:background="#70737373">
-
-        <TextView
-            android:id="@+id/date1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:padding="8dp"
-            android:text="星期一"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
-
-        <TextView
-            android:id="@+id/date1Temp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:padding="8dp"
-            android:text="30/20"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
-
-        <ImageView
-            android:id="@+id/date1Image"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_centerVertical="true"
-            android:layout_toLeftOf="@+id/date1Temp"
-            android:padding="8dp" />
-
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:id="@+id/forecast2"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_below="@+id/forecast1"
-        android:layout_marginTop="16dp"
-        android:background="#70737373">
-
-        <TextView
-            android:id="@+id/date2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:padding="8dp"
-            android:text="星期一"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
-
-        <TextView
-            android:id="@+id/date2Temp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:padding="8dp"
-            android:text="30/20"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
-
-        <ImageView
-            android:id="@+id/date2Image"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_centerVertical="true"
-            android:layout_toLeftOf="@+id/date2Temp"
-            android:padding="8dp" />
-
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:id="@+id/forecast3"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_below="@+id/forecast2"
-        android:layout_marginTop="16dp"
-        android:background="#70737373">
-
-        <TextView
-            android:id="@+id/date3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:padding="8dp"
-            android:text="星期一"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
-
-        <TextView
-            android:id="@+id/date3Temp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:padding="8dp"
-            android:text="30/20"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
-
-        <ImageView
-            android:id="@+id/date3Image"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_centerVertical="true"
-            android:layout_toLeftOf="@+id/date3Temp"
-            android:padding="8dp" />
-
-    </RelativeLayout>
-
-</RelativeLayout>

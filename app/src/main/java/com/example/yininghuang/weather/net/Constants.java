@@ -1,5 +1,7 @@
 package com.example.yininghuang.weather.net;
 
+import android.content.Context;
+
 /**
  * Created by Yining Huang on 2016/9/22.
  */
@@ -26,8 +28,8 @@ public class Constants {
         return CITY_COUNT;
     }
 
-    public static String getWeatherImage(String weatherCode) {
-        return "http://files.heweather.com/cond_icon/" + weatherCode + ".png";
+    public static int getWeatherImage(String weatherCode, Context context) {
+        return context.getResources().getIdentifier("img_" + weatherCode, "drawable", "com.example.yininghuang.weather");
     }
 
     public static char getDegreeSymbol() {

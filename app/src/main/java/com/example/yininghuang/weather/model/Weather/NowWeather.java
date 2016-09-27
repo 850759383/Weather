@@ -20,6 +20,17 @@ public class NowWeather {
     @SerializedName("hum")
     private String humidity;
 
+    @SerializedName("wind")
+    private Wind wind;
+
+    public Wind getWind() {
+        return wind;
+    }
+
+    public void setWind(Wind wind) {
+        this.wind = wind;
+    }
+
     public WeatherStatus getWeatherStatus() {
         return weatherStatus;
     }
@@ -74,6 +85,57 @@ public class NowWeather {
 
         public void setWeatherName(String weatherName) {
             this.weatherName = weatherName;
+        }
+    }
+
+    public static class Wind {
+
+        /**
+         * deg : 70
+         * dir : 东北风
+         * sc : 5-6
+         * spd : 27
+         */
+
+        @SerializedName("deg")
+        private String degree;
+        @SerializedName("dir")
+        private String direction;
+        @SerializedName("sc")
+        private String level;
+        @SerializedName("spd")
+        private String speed;
+
+        public String getDegree() {
+            return degree;
+        }
+
+        public void setDegree(String degree) {
+            this.degree = degree;
+        }
+
+        public String getDirection() {
+            return direction;
+        }
+
+        public void setDirection(String direction) {
+            this.direction = direction;
+        }
+
+        public String getLevel() {
+            return level;
+        }
+
+        public void setLevel(String level) {
+            this.level = level;
+        }
+
+        public String getSpeed() {
+            return speed;
+        }
+
+        public void setSpeed(String speed) {
+            this.speed = speed;
         }
     }
 }

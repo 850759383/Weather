@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
+import rx.Observable;
+import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Func1;
@@ -50,6 +52,8 @@ public class WeatherPresenter implements WeatherContract.Presenter {
             WeatherList.Weather cache = loadFromCache(name);
             if (cache != null)
                 weatherView.updateWeather(cache);
+            else
+                weatherView.setRefresh(true);
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -82,6 +86,7 @@ public class WeatherPresenter implements WeatherContract.Presenter {
                     @Override
                     public void call(WeatherList.Weather weather) {
                         System.out.println("更新天气");
+                        weatherView.setRefresh(false);
                         weatherView.updateWeather(weather);
                         try {
                             saveToCache(weather);
@@ -129,15 +134,20 @@ public class WeatherPresenter implements WeatherContract.Presenter {
     }
 
     @Override
-    public String getCityName(Location location) {
-        try {
-            Geocoder gcd = new Geocoder(context, Locale.getDefault());
-            List<Address> addresses = gcd.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
-            return addresses.get(0).getLocality();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
+    public Observable<String> getCityName(final Location location) {
+        return Observable.create(new Observable.OnSubscribe<String>() {
+            @Override
+            public void call(Subscriber<? super String> subscriber) {
+                try {
+                    Geocoder gcd = new Geocoder(context, Locale.getDefault());
+                    List<Address> addresses = gcd.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+                    subscriber.onNext(addresses.get(0).getLocality());
+                } catch (IOException e) {
+                    subscriber.onError(e);
+                }
+            }
+        }).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
     @Override

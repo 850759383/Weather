@@ -4,6 +4,8 @@ import android.location.Location;
 
 import com.example.yininghuang.weather.model.Weather.WeatherList;
 
+import rx.Observable;
+
 /**
  * Created by Yining Huang on 2016/9/23.
  */
@@ -18,13 +20,15 @@ public class WeatherContract {
 
         void fetchWeather(String cityName);
 
-        String getCityName(Location location);
+        Observable<String> getCityName(Location location);
 
         void onStop();
 
     }
 
     interface View {
+
+        void setRefresh(Boolean status);
 
         void updateWeather(WeatherList.Weather weather);
     }
