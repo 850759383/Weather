@@ -1,41 +1,46 @@
 package com.example.yininghuang.weather.model;
 
-import com.google.gson.annotations.SerializedName;
-
 /**
- * Created by Yining Huang on 2016/9/21.
+ * Created by Yining Huang on 2016/9/28.
  */
 
 public class City {
 
-    private String city;
+    private String name;
+    private String updateTime;
+    private String weather;
 
-    private String id;
-
-    @SerializedName("prov")
-    private String province;
-
-    public String getCity() {
-        return city;
+    public City(String name, String update, String weather) {
+        this.name = name;
+        this.updateTime = update;
+        this.weather = weather;
     }
 
-    public void setCity(String city) {
-        this.city = city;
+    public City() {
+
     }
 
-    public String getId() {
-        return id;
+    public String getName() {
+        return name;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getProvince() {
-        return province;
+    public String getUpdateTime() {
+        return updateTime;
     }
 
-    public void setProvince(String province) {
-        this.province = province;
+    public void setUpdateTime(String updateTime) {
+        this.updateTime = updateTime;
+    }
+
+    public String getWeather() {
+        return weather;
+    }
+
+    public void setWeather(String weather) {
+        this.weather = weather;
     }
 }

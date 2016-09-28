@@ -9,7 +9,7 @@ import java.util.Date;
  * Created by Yining Huang on 2016/9/23.
  */
 
-public class DateFormat {
+public class DateUtils {
 
     private static final String[] week = new String[]{"星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"};
 
@@ -75,7 +75,12 @@ public class DateFormat {
     }
 
     public static String format(Date yourDate) {
-        if (isToday(yourDate)) {
+        long interval = System.currentTimeMillis() - yourDate.getTime();
+        if (interval < 1000 * 60) {
+            return "刚刚";
+        } else if (interval < 1000 * 60 * 60) {
+            return (int) (interval / 60000) + "分钟前";
+        } else if (isToday(yourDate)) {
             SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
             return dateFormat.format(yourDate);
         } else if (isYesterday(yourDate)) {
