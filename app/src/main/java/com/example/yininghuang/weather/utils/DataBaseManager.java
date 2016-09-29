@@ -7,11 +7,17 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.example.yininghuang.weather.model.City;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by Yining Huang on 2016/9/28.
  */
 
 public class DataBaseManager {
+
+    public static final int POSITIONING = 0;
+    public static final int UN_POSITIONING = 1;
 
     private static DataBaseManager INSTANCE;
     private SQLiteDatabase database;
@@ -46,8 +52,8 @@ public class DataBaseManager {
 
     public void insertCity(City city) {
         database.beginTransaction();
-        database.execSQL("INSERT INTO city VALUES(?, ?, ?)",
-                new Object[]{city.getName(), city.getUpdateTime(), city.getWeather()});
+        database.execSQL("INSERT INTO city VALUES(?, ?, ?, ?)",
+                new Object[]{city.getName(), city.getUpdateTime(), city.getWeather(), city.getPositioning()});
         database.setTransactionSuccessful();
         database.endTransaction();
     }
@@ -68,9 +74,27 @@ public class DataBaseManager {
             city.setName(cursor.getString(cursor.getColumnIndex("name")));
             city.setUpdateTime(cursor.getString(cursor.getColumnIndex("updateTime")));
             city.setWeather(cursor.getString(cursor.getColumnIndex("weather")));
+            city.setPositioning(cursor.getInt(cursor.getColumnIndex("positioning")));
         }
         cursor.close();
         return city;
+    }
+
+    public List<City> queryCityList() {
+        List<City> cityList = new ArrayList<>();
+        Cursor cursor = database.query("city", null, null, null, null, null, null);
+        if (cursor.moveToFirst()) {
+            do {
+                City city = new City();
+                city.setName(cursor.getString(cursor.getColumnIndex("name")));
+                city.setUpdateTime(cursor.getString(cursor.getColumnIndex("updateTime")));
+                city.setWeather(cursor.getString(cursor.getColumnIndex("weather")));
+                city.setPositioning(cursor.getInt(cursor.getColumnIndex("positioning")));
+                cityList.add(city);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        return cityList;
     }
 
 }

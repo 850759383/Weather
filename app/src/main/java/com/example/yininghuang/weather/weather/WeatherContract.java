@@ -1,4 +1,4 @@
-package com.example.yininghuang.weather;
+package com.example.yininghuang.weather.weather;
 
 import com.example.yininghuang.weather.model.Weather.WeatherList;
 

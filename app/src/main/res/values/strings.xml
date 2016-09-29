@@ -1,6 +1,14 @@
 <resources>
     <string name="app_name">Weather</string>
+    <string name="degree">\u00B0</string>
+    <string name="not_available">N/A</string>
+    <string name="humidity">湿度</string>
+    <string name="air_quality">空气质量</string>
+    <string name="wind_speed">风速</string>
+    <string name="data_provider">数据来源：heweather.com</string>
+    <string name="updating">正在更新</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="search">搜索城市</string>
+
+    <string name="save_location">我的已保存位置</string>
 </resources>

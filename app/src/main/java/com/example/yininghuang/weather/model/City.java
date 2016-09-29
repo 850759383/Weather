@@ -9,15 +9,25 @@ public class City {
     private String name;
     private String updateTime;
     private String weather;
+    private int positioning;
 
-    public City(String name, String update, String weather) {
+    public City(String name, String update, String weather, int positioning) {
         this.name = name;
         this.updateTime = update;
         this.weather = weather;
+        this.positioning = positioning;
     }
 
     public City() {
 
+    }
+
+    public int getPositioning() {
+        return positioning;
+    }
+
+    public void setPositioning(int positioning) {
+        this.positioning = positioning;
     }
 
     public String getName() {

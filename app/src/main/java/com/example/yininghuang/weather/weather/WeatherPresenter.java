@@ -1,4 +1,4 @@
-package com.example.yininghuang.weather;
+package com.example.yininghuang.weather.weather;
 
 import android.Manifest;
 import android.content.Context;
@@ -37,6 +37,8 @@ import rx.functions.Func1;
 import rx.internal.util.SubscriptionList;
 import rx.schedulers.Schedulers;
 
+import static com.example.yininghuang.weather.utils.Utils.formatCityName;
+
 /**
  * Created by Yining Huang on 2016/9/23.
  */
@@ -46,7 +48,6 @@ public class WeatherPresenter implements WeatherContract.Presenter, LocationList
     private final WeatherContract.View weatherView;
     private LocationManager locationManager;
     private String latestLocation;
-    private final String cacheDir;
     private final Context context;
     private WeatherList.Weather weather;
     private Boolean isAutoLocation = true;
@@ -58,29 +59,24 @@ public class WeatherPresenter implements WeatherContract.Presenter, LocationList
     public WeatherPresenter(WeatherContract.View weatherView, Context context) {
         this.weatherView = weatherView;
         this.context = context.getApplicationContext();
-        cacheDir = context.getCacheDir().getAbsolutePath();
         locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
     }
 
     public WeatherPresenter(WeatherContract.View weatherView, Context context, String requireLocation) {
         this(weatherView, context);
-        latestLocation = requireLocation;
+        latestLocation = formatCityName(requireLocation);
         isAutoLocation = false;
     }
 
     @Override
     public void init() {
-        if (isAutoLocation) {
+        if (isAutoLocation)
             latestLocation = SharedPreferenceHelper.getStringPreference(context, PREFERENCE_LOCATION);
-        }
-
-        String name = formatCityName(latestLocation);
-        City city = queryFromDB(name);
+        City city = queryFromDB(latestLocation);
         if (city != null) {
             weather = new Gson().fromJson(city.getWeather(), WeatherList.Weather.class);
             weatherView.updateWeather(weather, city.getUpdateTime());
         }
-
         if (isAutoLocation) {
             requestLocationUpdate();
         }
@@ -109,13 +105,12 @@ public class WeatherPresenter implements WeatherContract.Presenter, LocationList
     }
 
     private void fetchWeather() {
-        String name = formatCityName(latestLocation);
-        if (TextUtils.isEmpty(name))
+        if (TextUtils.isEmpty(latestLocation))
             return;
 
         weatherView.setBottomRefresh(true, "正在更新");
         Subscription subscription = RetrofitHelper.createRetrofit(RemoteWeatherService.class)
-                .getWeatherWithName(name, Constants.getKey())
+                .getWeatherWithName(latestLocation, Constants.getKey())
                 .map(new Func1<WeatherList, WeatherList.Weather>() {
                     @Override
                     public WeatherList.Weather call(WeatherList weatherList) {
@@ -157,10 +152,18 @@ public class WeatherPresenter implements WeatherContract.Presenter, LocationList
         Subscription subscription = locationToCityName(location).subscribe(new Action1<String>() {
             @Override
             public void call(String s) {
-                if (s != null) {
-                    latestLocation = s;
-                    SharedPreferenceHelper.setStringPreference(context, PREFERENCE_LOCATION, s);
-                    fetchWeather();
+                String city = formatCityName(s);
+                if (city != null) {
+                    if (city.equals(latestLocation) && shouldUpdate()) {
+                        fetchWeather();
+                    } else if (!city.equals(latestLocation)) {
+                        latestLocation = city;
+                        fetchWeather();
+                    } else {
+                        weatherView.setBottomRefresh(false, null);
+                    }
+                    if (latestLocation != null)
+                        SharedPreferenceHelper.setStringPreference(context, PREFERENCE_LOCATION, latestLocation);
                 }
             }
         }, new Action1<Throwable>() {
@@ -190,33 +193,25 @@ public class WeatherPresenter implements WeatherContract.Presenter, LocationList
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    private String formatCityName(String name) {
-        if (TextUtils.isEmpty(name))
-            return null;
-
-        String last = name.substring(name.length() - 1);
-        if (last.equals("县") || last.equals("市") || last.equals("区")) {
-            name = name.substring(0, name.length() - 1);
-        }
-        return name;
-    }
-
     private void saveToDB(WeatherList.Weather weather, String updateTime) {
+        int positioning = DataBaseManager.UN_POSITIONING;
+        if (isAutoLocation)
+            positioning = DataBaseManager.POSITIONING;
         DataBaseManager.getInstance().addOrUpdateCity(
                 new City(
                         weather.getBasicCityInfo().getCityName(),
                         updateTime,
-                        new Gson().toJson(weather)
+                        new Gson().toJson(weather),
+                        positioning
                 )
         );
     }
 
     private City queryFromDB(String cityName) {
-        String name = formatCityName(cityName);
-        if (TextUtils.isEmpty(name))
+        if (cityName == null)
             return null;
 
-        return DataBaseManager.getInstance().queryCity(name);
+        return DataBaseManager.getInstance().queryCity(cityName);
     }
 
     private Boolean shouldUpdate() {

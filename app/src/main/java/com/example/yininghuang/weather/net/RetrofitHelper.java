@@ -13,13 +13,13 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitHelper {
 
-    public static <T> T createRetrofit(Class<T> clazz) {
+    public static <T> T createRetrofit(Class<T> retrofitInterface) {
         return new Retrofit.Builder()
                 .baseUrl(Constants.getBaseUrl())
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .client(createClient())
-                .build().create(clazz);
+                .build().create(retrofitInterface);
     }
 
     public static OkHttpClient createClient() {

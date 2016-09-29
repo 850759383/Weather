@@ -11,7 +11,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class DataBaseHelper extends SQLiteOpenHelper {
 
     private static final String DB_NAME = "location.db";
-    private static final int DB_VERSION = 2;
+    private static final int DB_VERSION = 3;
 
     public DataBaseHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
@@ -19,7 +19,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("CREATE TABLE IF NOT EXISTS city(name TEXT PRIMARY KEY, updateTime TEXT, weather TEXT)");
+        db.execSQL("CREATE TABLE IF NOT EXISTS city(name TEXT PRIMARY KEY, updateTime TEXT, weather TEXT, positioning INTEGER)");
     }
 
     @Override

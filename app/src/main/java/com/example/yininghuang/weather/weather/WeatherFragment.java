@@ -1,13 +1,10 @@
-package com.example.yininghuang.weather;
+package com.example.yininghuang.weather.weather;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -15,6 +12,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.yininghuang.weather.R;
 import com.example.yininghuang.weather.model.Weather.DailyForecast;
 import com.example.yininghuang.weather.model.Weather.WeatherList;
 import com.example.yininghuang.weather.net.Constants;
@@ -28,7 +26,7 @@ import butterknife.ButterKnife;
 public class WeatherFragment extends Fragment implements WeatherContract.View {
 
     @BindView(R.id.cityTitle)
-    TextView title;
+    TextView cityTitle;
     @BindView(R.id.weatherImage)
     ImageView weatherImage;
     @BindView(R.id.weatherText)
@@ -78,32 +76,27 @@ public class WeatherFragment extends Fragment implements WeatherContract.View {
     TextView forecastTemp3;
 
     private WeatherPresenter presenter;
-    private String requireCityName = null;
     private Boolean isRefresh = false;
     private long updateTime = -1;
 
-    public WeatherFragment() {
-
-    }
-
-    public static WeatherFragment newInstance(String cityName) {
+    public static WeatherFragment newInstance(String cityName, Boolean positioning) {
         Bundle bundle = new Bundle();
         bundle.putString("city", cityName);
+        bundle.putBoolean("positioning", positioning);
         WeatherFragment fragment = new WeatherFragment();
         fragment.setArguments(bundle);
         return fragment;
-    }
-
-    public static WeatherFragment newInstance() {
-        return new WeatherFragment();
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Bundle argument = getArguments();
-        if (argument != null) {
-            requireCityName = argument.getString("city");
+        String name = argument.getString("city");
+        if (argument.getBoolean("positioning")) {
+            presenter = new WeatherPresenter(this, getActivity());
+        } else {
+            presenter = new WeatherPresenter(this, getActivity(), name);
         }
     }
 
@@ -117,20 +110,10 @@ public class WeatherFragment extends Fragment implements WeatherContract.View {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        initView(view);
+        initView();
     }
 
-    private void initView(View view) {
-        setHasOptionsMenu(true);
-        Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
-        ((MainActivity) getActivity()).setSupportActionBar(toolbar);
-
-        if (requireCityName == null)
-            presenter = new WeatherPresenter(this, getActivity());
-        else
-            presenter = new WeatherPresenter(this, getActivity(), requireCityName);
-
-        swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipeRefreshLayout);
+    private void initView() {
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -144,7 +127,7 @@ public class WeatherFragment extends Fragment implements WeatherContract.View {
 
     @Override
     public void updateWeather(WeatherList.Weather weather, String updateTime) {
-        title.setText(weather.getBasicCityInfo().getCityName());
+        cityTitle.setText(weather.getBasicCityInfo().getCityName());
         this.updateTime = Long.valueOf(updateTime);
         updateTimeText.setText("更新时间：" + DateUtils.format(new Date(this.updateTime)));
         DailyForecast today = weather.getDailyForecasts().get(0);
@@ -180,12 +163,6 @@ public class WeatherFragment extends Fragment implements WeatherContract.View {
         forecastDate2.setText(DateUtils.getWeekOfYear(DateUtils.getTime2(forecast2.getDate())));
         forecastDate3.setText(DateUtils.getWeekOfYear(DateUtils.getTime2(forecast3.getDate())));
 
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.menu_main, menu);
     }
 
     @Override

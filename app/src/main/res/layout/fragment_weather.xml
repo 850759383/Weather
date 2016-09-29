@@ -1,45 +1,35 @@
 <android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/swipeRefreshLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.yininghuang.weather.WeatherFragment"
-    android:background="#00000000">
+    android:background="#00000000"
+    tools:context="com.example.yininghuang.weather.weather.WeatherFragment">
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fillViewport="true"
-        >
+        android:fillViewport="true">
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <android.support.v7.widget.Toolbar
-                android:id="@+id/toolbar"
+            <TextView
+                android:id="@+id/cityTitle"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                app:navigationIcon="@drawable/ic_menu_white_24dp">
-
-                <TextView
-                    android:id="@+id/cityTitle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginRight="16dp"
-                    android:gravity="center"
-                    android:text="N/A"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Title" />
-            </android.support.v7.widget.Toolbar>
+                android:gravity="center"
+                android:text="@string/not_available"
+                android:textAppearance="@style/TextAppearance.AppCompat.Title" />
 
             <TextView
                 android:id="@+id/currentTemp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/toolbar"
+                android:layout_below="@id/cityTitle"
                 android:layout_centerHorizontal="true"
-                android:text="N/A"
+                android:text="@string/not_available"
                 android:textSize="72sp"
                 android:typeface="normal" />
 
@@ -49,21 +39,20 @@
                 android:layout_height="wrap_content"
                 android:layout_alignTop="@id/currentTemp"
                 android:layout_toRightOf="@id/currentTemp"
-                android:text="\u00B0"
+                android:text="@string/degree"
                 android:textSize="72sp"
                 android:typeface="normal" />
-
 
             <ImageView
                 android:id="@+id/weatherImage"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
-                android:layout_below="@+id/toolbar"
+                android:layout_below="@+id/cityTitle"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="24dp"
                 android:layout_toStartOf="@+id/currentTemp"
-                android:scaleType="centerInside"
-                android:padding="8dp" />
+                android:padding="8dp"
+                android:scaleType="centerInside" />
 
             <TextView
                 android:id="@+id/weatherText"
@@ -119,7 +108,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_horizontal"
-                        android:text="湿度" />
+                        android:text="@string/humidity" />
 
                     <TextView
                         android:id="@+id/humidity"
@@ -138,7 +127,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_horizontal"
-                        android:text="空气质量" />
+                        android:text="@string/air_quality" />
 
                     <TextView
                         android:id="@+id/airQuality"
@@ -158,7 +147,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_horizontal"
-                        android:text="风速" />
+                        android:text="@string/wind_speed" />
 
                     <TextView
                         android:id="@+id/windSpeed"
@@ -201,8 +190,8 @@
                     android:layout_height="48dp"
                     android:layout_centerVertical="true"
                     android:layout_toLeftOf="@+id/date1Temp"
-                    android:scaleType="centerInside"
-                    android:padding="8dp" />
+                    android:padding="8dp"
+                    android:scaleType="centerInside" />
 
             </RelativeLayout>
 
@@ -237,8 +226,8 @@
                     android:layout_height="48dp"
                     android:layout_centerVertical="true"
                     android:layout_toLeftOf="@+id/date2Temp"
-                    android:scaleType="centerInside"
-                    android:padding="8dp" />
+                    android:padding="8dp"
+                    android:scaleType="centerInside" />
 
             </RelativeLayout>
 
@@ -273,8 +262,8 @@
                     android:layout_height="48dp"
                     android:layout_centerVertical="true"
                     android:layout_toLeftOf="@+id/date3Temp"
-                    android:scaleType="centerInside"
-                    android:padding="8dp" />
+                    android:padding="8dp"
+                    android:scaleType="centerInside" />
 
             </RelativeLayout>
 
@@ -293,7 +282,7 @@
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentLeft="true"
                 android:padding="8dp"
-                android:text="数据来源：heweather.com"
+                android:text="@string/data_provider"
                 android:textAppearance="@style/Base.TextAppearance.AppCompat.Caption" />
 
             <LinearLayout
@@ -316,7 +305,7 @@
                     android:id="@+id/updateMessage"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="正在更新"
+                    android:text="@string/updating"
                     android:textAppearance="@style/Base.TextAppearance.AppCompat.Caption" />
             </LinearLayout>
 
