@@ -154,6 +154,7 @@ public class WeatherActivity extends AppCompatActivity implements NavigationAdap
     @Override
     public void onItemDelete(String name) {
         pagerLocation.remove(name);
+        recLocation.remove(name);
         weatherPagerAdapter.notifyDataSetChanged();
         navigationAdapter.notifyDataSetChanged();
         DataBaseManager.getInstance().deleteCity(name);
