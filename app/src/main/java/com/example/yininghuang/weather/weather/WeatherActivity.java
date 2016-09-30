@@ -44,7 +44,8 @@ public class WeatherActivity extends AppCompatActivity implements NavigationAdap
     public static final int PERMISSION_CODE = 1;
     private WeatherPagerAdapter weatherPagerAdapter;
     private NavigationAdapter navigationAdapter;
-    private List<String> mLocation = new ArrayList<>();
+    private List<String> pagerLocation = new ArrayList<>();
+    private List<String> recLocation = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,9 +54,10 @@ public class WeatherActivity extends AppCompatActivity implements NavigationAdap
         ButterKnife.bind(this);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
-        mLocation.addAll(getCityNameList());
-        weatherPagerAdapter = new WeatherPagerAdapter(getSupportFragmentManager(), mLocation);
-        navigationAdapter = new NavigationAdapter(mLocation);
+        pagerLocation.addAll(getCityNameList());
+        recLocation.addAll(pagerLocation);
+        weatherPagerAdapter = new WeatherPagerAdapter(getSupportFragmentManager(), pagerLocation);
+        navigationAdapter = new NavigationAdapter(recLocation);
         navigationAdapter.setOnNavigationItemClickListener(this);
         navRec.setLayoutManager(new LinearLayoutManager(this));
         navRec.setAdapter(navigationAdapter);
@@ -80,8 +82,8 @@ public class WeatherActivity extends AppCompatActivity implements NavigationAdap
     }
 
     public void updateDrawerRec() {
-        mLocation.clear();
-        mLocation.addAll(getCityNameList());
+        recLocation.clear();
+        recLocation.addAll(getCityNameList());
         navigationAdapter.notifyDataSetChanged();
     }
 
@@ -115,12 +117,15 @@ public class WeatherActivity extends AppCompatActivity implements NavigationAdap
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         String location = intent.getStringExtra("city");
-        if (!mLocation.contains(location)) {
-            mLocation.add(location);
+        if (!pagerLocation.contains(location)) {
+            pagerLocation.add(location);
+            weatherPagerAdapter.notifyDataSetChanged();
         }
-        weatherPagerAdapter.notifyDataSetChanged();
-        navigationAdapter.notifyDataSetChanged();
-        int index = mLocation.indexOf(location);
+        if (!recLocation.contains(location)){
+            recLocation.add(location);
+            navigationAdapter.notifyDataSetChanged();
+        }
+        int index = pagerLocation.indexOf(location);
         viewPager.setCurrentItem(index, false);
     }
 
@@ -141,14 +146,14 @@ public class WeatherActivity extends AppCompatActivity implements NavigationAdap
 
     @Override
     public void onItemClick(String name) {
-        int index = mLocation.indexOf(name);
+        int index = pagerLocation.indexOf(name);
         viewPager.setCurrentItem(index, false);
         drawerLayout.closeDrawers();
     }
 
     @Override
     public void onItemDelete(String name) {
-        mLocation.remove(name);
+        pagerLocation.remove(name);
         weatherPagerAdapter.notifyDataSetChanged();
         navigationAdapter.notifyDataSetChanged();
         DataBaseManager.getInstance().deleteCity(name);
