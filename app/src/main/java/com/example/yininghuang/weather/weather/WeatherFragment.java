@@ -27,6 +27,8 @@ public class WeatherFragment extends Fragment implements WeatherContract.View {
 
     @BindView(R.id.cityTitle)
     TextView cityTitle;
+    @BindView(R.id.locationOn)
+    ImageView locationOnIcon;
     @BindView(R.id.weatherImage)
     ImageView weatherImage;
     @BindView(R.id.weatherText)
@@ -78,6 +80,8 @@ public class WeatherFragment extends Fragment implements WeatherContract.View {
     private WeatherPresenter presenter;
     private Boolean isRefresh = false;
     private long updateTime = -1;
+    private Boolean isAutoLocation = false;
+    private String degreeSymbol;
 
     public static WeatherFragment newInstance(String cityName, Boolean positioning) {
         Bundle bundle = new Bundle();
@@ -93,7 +97,8 @@ public class WeatherFragment extends Fragment implements WeatherContract.View {
         super.onCreate(savedInstanceState);
         Bundle argument = getArguments();
         String name = argument.getString("city");
-        if (argument.getBoolean("positioning")) {
+        isAutoLocation = argument.getBoolean("positioning");
+        if (isAutoLocation) {
             presenter = new WeatherPresenter(this, getActivity());
         } else {
             presenter = new WeatherPresenter(this, getActivity(), name);
@@ -122,6 +127,12 @@ public class WeatherFragment extends Fragment implements WeatherContract.View {
                 swipeRefreshLayout.setRefreshing(false);
             }
         });
+        if (isAutoLocation) {
+            locationOnIcon.setVisibility(View.VISIBLE);
+        } else {
+            locationOnIcon.setVisibility(View.GONE);
+        }
+        degreeSymbol = getResources().getString(R.string.degree);
         presenter.init();
     }
 
@@ -132,14 +143,21 @@ public class WeatherFragment extends Fragment implements WeatherContract.View {
         updateTimeText.setText("更新时间：" + DateUtils.format(new Date(this.updateTime)));
         DailyForecast today = weather.getDailyForecasts().get(0);
         currentTemp.setText(weather.getNowWeather().getTemperature());
-        maxTemp.setText(today.getTemperature().getMaxTemperature() + Constants.getDegreeSymbol());
-        minTemp.setText(today.getTemperature().getMinTemperature() + Constants.getDegreeSymbol());
+        maxTemp.setText(today.getTemperature().getMaxTemperature() + degreeSymbol);
+        minTemp.setText(today.getTemperature().getMinTemperature() + degreeSymbol);
         weatherText.setText(weather.getNowWeather().getWeatherStatus().getWeatherName());
         weatherImage.setImageResource(Constants.getWeatherImage(weather.getNowWeather().getWeatherStatus().getWeatherCode(), getActivity()));
-        feelTemp.setText("体感温度：" + weather.getNowWeather().getFeelTemperature() + Constants.getDegreeSymbol());
+        feelTemp.setText("体感温度：" + weather.getNowWeather().getFeelTemperature() + degreeSymbol);
         humidity.setText(weather.getNowWeather().getHumidity() + "%");
-        airQuality.setText(weather.getAirQuality().getCity().getQlty());
         windSpeed.setText(weather.getNowWeather().getWind().getSpeed() + "km/h");
+        if (weather.getBasicCityInfo().getCountry().equals("中国")) {
+            airQuality.setText(weather.getAirQuality().getCity().getQlty());
+        } else {
+            airQuality.setText(getResources().getString(R.string.not_available));
+        }
+        if (isAutoLocation) {
+            ((WeatherActivity)getActivity()).updateDrawerRec();
+        }
         setUpDailyForeCast(weather);
     }
 
@@ -152,12 +170,12 @@ public class WeatherFragment extends Fragment implements WeatherContract.View {
         forecastImage2.setImageResource(Constants.getWeatherImage(forecast2.getWeatherStatus().getWeatherCodeDay(), getActivity()));
         forecastImage3.setImageResource(Constants.getWeatherImage(forecast3.getWeatherStatus().getWeatherCodeDay(), getActivity()));
 
-        forecastTemp1.setText(forecast1.getTemperature().getMaxTemperature() + Constants.getDegreeSymbol() + "/"
-                + forecast1.getTemperature().getMinTemperature() + Constants.getDegreeSymbol());
-        forecastTemp2.setText(forecast2.getTemperature().getMaxTemperature() + Constants.getDegreeSymbol() + "/"
-                + forecast2.getTemperature().getMinTemperature() + Constants.getDegreeSymbol());
-        forecastTemp3.setText(forecast3.getTemperature().getMaxTemperature() + Constants.getDegreeSymbol() + "/"
-                + forecast3.getTemperature().getMinTemperature() + Constants.getDegreeSymbol());
+        forecastTemp1.setText(forecast1.getTemperature().getMaxTemperature() + degreeSymbol + "/"
+                + forecast1.getTemperature().getMinTemperature() + degreeSymbol);
+        forecastTemp2.setText(forecast2.getTemperature().getMaxTemperature() + degreeSymbol + "/"
+                + forecast2.getTemperature().getMinTemperature() + degreeSymbol);
+        forecastTemp3.setText(forecast3.getTemperature().getMaxTemperature() + degreeSymbol + "/"
+                + forecast3.getTemperature().getMinTemperature() + degreeSymbol);
 
         forecastDate1.setText(DateUtils.getWeekOfYear(DateUtils.getTime2(forecast1.getDate())));
         forecastDate2.setText(DateUtils.getWeekOfYear(DateUtils.getTime2(forecast2.getDate())));

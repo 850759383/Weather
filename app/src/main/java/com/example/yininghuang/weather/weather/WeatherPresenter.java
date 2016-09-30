@@ -3,8 +3,6 @@ package com.example.yininghuang.weather.weather;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -13,23 +11,22 @@ import android.os.Looper;
 import android.support.v4.app.ActivityCompat;
 import android.text.TextUtils;
 
+import com.example.yininghuang.weather.model.AMapGeoCode;
 import com.example.yininghuang.weather.model.City;
 import com.example.yininghuang.weather.model.Weather.WeatherList;
 import com.example.yininghuang.weather.net.Constants;
-import com.example.yininghuang.weather.net.RemoteWeatherService;
+import com.example.yininghuang.weather.net.LocationAnalysisService;
 import com.example.yininghuang.weather.net.RetrofitHelper;
+import com.example.yininghuang.weather.net.WeatherService;
 import com.example.yininghuang.weather.utils.DataBaseManager;
 import com.example.yininghuang.weather.utils.DateUtils;
 import com.example.yininghuang.weather.utils.SharedPreferenceHelper;
 import com.google.gson.Gson;
 
-import java.io.IOException;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 import rx.Observable;
-import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
@@ -109,8 +106,8 @@ public class WeatherPresenter implements WeatherContract.Presenter, LocationList
             return;
 
         weatherView.setBottomRefresh(true, "正在更新");
-        Subscription subscription = RetrofitHelper.createRetrofit(RemoteWeatherService.class)
-                .getWeatherWithName(latestLocation, Constants.getKey())
+        Subscription subscription = RetrofitHelper.createRetrofit(WeatherService.class, Constants.getWeatherBaseUrl())
+                .getWeatherWithName(latestLocation, Constants.getWeatherKey())
                 .map(new Func1<WeatherList, WeatherList.Weather>() {
                     @Override
                     public WeatherList.Weather call(WeatherList weatherList) {
@@ -122,12 +119,16 @@ public class WeatherPresenter implements WeatherContract.Presenter, LocationList
                 .subscribe(new Action1<WeatherList.Weather>() {
                     @Override
                     public void call(WeatherList.Weather weather) {
-                        System.out.println("更新天气");
-                        weatherView.setBottomRefresh(false, null);
-                        String currentTime = Long.toString(System.currentTimeMillis());
-                        weatherView.updateWeather(weather, currentTime);
-                        WeatherPresenter.this.weather = weather;
-                        saveToDB(weather, currentTime);
+                        if (weather.getStatus().equals("ok")) {
+                            weatherView.setBottomRefresh(false, null);
+                            String currentTime = Long.toString(System.currentTimeMillis());
+                            WeatherPresenter.this.weather = weather;
+                            saveToDB(weather, currentTime);
+                            weatherView.updateWeather(weather, currentTime);
+                        } else {
+                            weatherView.setBottomRefresh(false, null);
+                            weatherView.showMessage(weather.getStatus());
+                        }
                     }
                 }, new Action1<Throwable>() {
                     @Override
@@ -149,7 +150,15 @@ public class WeatherPresenter implements WeatherContract.Presenter, LocationList
 
     @Override
     public void onLocationChanged(final Location location) {
-        Subscription subscription = locationToCityName(location).subscribe(new Action1<String>() {
+        Subscription subscription = analysisLocation(location).map(new Func1<AMapGeoCode, String>() {
+            @Override
+            public String call(AMapGeoCode amapGeoCode) {
+                if (amapGeoCode.getInfocode().equals("10000")) {
+                    return amapGeoCode.getRegeocode().getAddressComponent().getDistrict();
+                }
+                return null;
+            }
+        }).subscribe(new Action1<String>() {
             @Override
             public void call(String s) {
                 String city = formatCityName(s);
@@ -177,19 +186,12 @@ public class WeatherPresenter implements WeatherContract.Presenter, LocationList
         subscriptionList.add(subscription);
     }
 
-    private Observable<String> locationToCityName(final Location location) {
-        return Observable.create(new Observable.OnSubscribe<String>() {
-            @Override
-            public void call(Subscriber<? super String> subscriber) {
-                try {
-                    Geocoder gcd = new Geocoder(context, Locale.getDefault());
-                    List<Address> addresses = gcd.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
-                    subscriber.onNext(addresses.get(0).getLocality());
-                } catch (IOException e) {
-                    subscriber.onError(e);
-                }
-            }
-        }).subscribeOn(Schedulers.io())
+    private Observable<AMapGeoCode> analysisLocation(Location location) {
+        Double lng = location.getLongitude();
+        Double lat = location.getLatitude();
+        return RetrofitHelper.createRetrofit(LocationAnalysisService.class, Constants.getAmapBaseUrl())
+                .analysis(Constants.getAmapKey(), lng.toString() + "," + lat)
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
@@ -197,14 +199,23 @@ public class WeatherPresenter implements WeatherContract.Presenter, LocationList
         int positioning = DataBaseManager.UN_POSITIONING;
         if (isAutoLocation)
             positioning = DataBaseManager.POSITIONING;
-        DataBaseManager.getInstance().addOrUpdateCity(
-                new City(
-                        weather.getBasicCityInfo().getCityName(),
-                        updateTime,
-                        new Gson().toJson(weather),
-                        positioning
-                )
-        );
+
+        City city = new City(weather.getBasicCityInfo().getCityName(), updateTime, new Gson().toJson(weather), positioning);
+        List<City> cityList = DataBaseManager.getInstance().queryCityWithPosition(positioning);
+        if (isAutoLocation && cityList.size() != 0) {
+            DataBaseManager.getInstance().updateCity(city, "positioning");
+        } else if (isAutoLocation) {
+            DataBaseManager.getInstance().insertCity(city);
+        } else {
+            DataBaseManager.getInstance().addOrUpdateCity(
+                    new City(
+                            weather.getBasicCityInfo().getCityName(),
+                            updateTime,
+                            new Gson().toJson(weather),
+                            positioning
+                    )
+            );
+        }
     }
 
     private City queryFromDB(String cityName) {

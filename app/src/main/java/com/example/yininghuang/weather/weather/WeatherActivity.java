@@ -7,9 +7,12 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -24,7 +27,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class WeatherActivity extends AppCompatActivity {
+public class WeatherActivity extends AppCompatActivity implements NavigationAdapter.OnNavigationItemClickListener {
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -33,31 +36,53 @@ public class WeatherActivity extends AppCompatActivity {
     ViewPager viewPager;
 
     @BindView(R.id.navRec)
-    RecyclerView recyclerView;
+    RecyclerView navRec;
+
+    @BindView(R.id.drawerLayout)
+    DrawerLayout drawerLayout;
 
     public static final int PERMISSION_CODE = 1;
-    private WeatherPagerAdapter adapter;
+    private WeatherPagerAdapter weatherPagerAdapter;
+    private NavigationAdapter navigationAdapter;
     private List<String> mLocation = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_weather);
         ButterKnife.bind(this);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
-        List<City> cityList = DataBaseManager.getInstance().queryCityList();
-        if (!cityList.isEmpty()) {
-            for (City city : cityList) {
-                mLocation.add(city.getName());
-            }
-        }
-        adapter = new WeatherPagerAdapter(getSupportFragmentManager(), mLocation);
+        mLocation.addAll(getCityNameList());
+        weatherPagerAdapter = new WeatherPagerAdapter(getSupportFragmentManager(), mLocation);
+        navigationAdapter = new NavigationAdapter(mLocation);
+        navigationAdapter.setOnNavigationItemClickListener(this);
+        navRec.setLayoutManager(new LinearLayoutManager(this));
+        navRec.setAdapter(navigationAdapter);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSION_CODE);
         else {
-            viewPager.setAdapter(adapter);
+            viewPager.setAdapter(weatherPagerAdapter);
         }
+    }
+
+    private List<String> getCityNameList() {
+        List<String> name = new ArrayList<>();
+        List<City> cityList = DataBaseManager.getInstance().queryCityList();
+        if (!cityList.isEmpty()) {
+            for (City city : cityList) {
+                name.add(city.getName());
+            }
+        } else {
+            name.add("正在定位");
+        }
+        return name;
+    }
+
+    public void updateDrawerRec() {
+        mLocation.clear();
+        mLocation.addAll(getCityNameList());
+        navigationAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -66,6 +91,15 @@ public class WeatherActivity extends AppCompatActivity {
             case R.id.action_add_location: {
                 Intent intent = new Intent(this, SearchActivity.class);
                 startActivity(intent);
+                break;
+            }
+            case android.R.id.home: {
+                if (drawerLayout.isDrawerOpen(Gravity.LEFT)) {
+                    drawerLayout.closeDrawers();
+                } else {
+                    drawerLayout.openDrawer(Gravity.LEFT);
+                }
+                break;
             }
         }
         return super.onOptionsItemSelected(item);
@@ -83,8 +117,9 @@ public class WeatherActivity extends AppCompatActivity {
         String location = intent.getStringExtra("city");
         if (!mLocation.contains(location)) {
             mLocation.add(location);
-            adapter.notifyDataSetChanged();
         }
+        weatherPagerAdapter.notifyDataSetChanged();
+        navigationAdapter.notifyDataSetChanged();
         int index = mLocation.indexOf(location);
         viewPager.setCurrentItem(index, false);
     }
@@ -98,9 +133,24 @@ public class WeatherActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == PERMISSION_CODE && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            viewPager.setAdapter(adapter);
+            viewPager.setAdapter(weatherPagerAdapter);
         } else {
             finish();
         }
+    }
+
+    @Override
+    public void onItemClick(String name) {
+        int index = mLocation.indexOf(name);
+        viewPager.setCurrentItem(index, false);
+        drawerLayout.closeDrawers();
+    }
+
+    @Override
+    public void onItemDelete(String name) {
+        mLocation.remove(name);
+        weatherPagerAdapter.notifyDataSetChanged();
+        navigationAdapter.notifyDataSetChanged();
+        DataBaseManager.getInstance().deleteCity(name);
     }
 }

@@ -3,8 +3,8 @@ package com.example.yininghuang.weather.search;
 import com.example.yininghuang.weather.model.City;
 import com.example.yininghuang.weather.model.Weather.WeatherList;
 import com.example.yininghuang.weather.net.Constants;
-import com.example.yininghuang.weather.net.RemoteWeatherService;
 import com.example.yininghuang.weather.net.RetrofitHelper;
+import com.example.yininghuang.weather.net.WeatherService;
 import com.example.yininghuang.weather.utils.DataBaseManager;
 import com.google.gson.Gson;
 
@@ -30,8 +30,8 @@ public class SearchPresenter implements SearchContract.Presenter {
     @Override
     public void search(String city) {
         searchView.setRefreshStatus(true);
-        subscription = RetrofitHelper.createRetrofit(RemoteWeatherService.class)
-                .getWeatherWithName(city, Constants.getKey())
+        subscription = RetrofitHelper.createRetrofit(WeatherService.class, Constants.getWeatherBaseUrl())
+                .getWeatherWithName(city, Constants.getWeatherKey())
                 .map(new Func1<WeatherList, WeatherList.Weather>() {
                     @Override
                     public WeatherList.Weather call(WeatherList weatherList) {
@@ -42,8 +42,13 @@ public class SearchPresenter implements SearchContract.Presenter {
                 .subscribe(new Action1<WeatherList.Weather>() {
                     @Override
                     public void call(WeatherList.Weather weather) {
-                        searchView.setSearchResult(weather);
-                        searchView.setRefreshStatus(false);
+                        if (weather.getStatus().equals("ok")) {
+                            searchView.setSearchResult(weather);
+                            searchView.setRefreshStatus(false);
+                        } else {
+                            searchView.setSearchResult(null);
+                            searchView.setRefreshStatus(false);
+                        }
                     }
                 }, new Action1<Throwable>() {
                     @Override
@@ -64,7 +69,7 @@ public class SearchPresenter implements SearchContract.Presenter {
         if (city == null) {
             DataBaseManager.getInstance().insertCity(c);
         } else if (city.getPositioning() != DataBaseManager.POSITIONING) {
-            DataBaseManager.getInstance().updateCity(c);
+            DataBaseManager.getInstance().updateCity(c, "name");
         }
     }
 

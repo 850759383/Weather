@@ -13,9 +13,9 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitHelper {
 
-    public static <T> T createRetrofit(Class<T> retrofitInterface) {
+    public static <T> T createRetrofit(Class<T> retrofitInterface, String baseUrl) {
         return new Retrofit.Builder()
-                .baseUrl(Constants.getBaseUrl())
+                .baseUrl(baseUrl)
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .client(createClient())
@@ -25,8 +25,6 @@ public class RetrofitHelper {
     public static OkHttpClient createClient() {
         return new OkHttpClient.Builder()
                 .connectTimeout(10, TimeUnit.SECONDS)
-                .retryOnConnectionFailure(true)
                 .build();
-
     }
 }

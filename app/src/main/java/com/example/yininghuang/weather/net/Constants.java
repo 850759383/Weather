@@ -8,33 +8,32 @@ import android.content.Context;
 
 public class Constants {
 
-    private static final String KEY = "41cb48fa8c78499dbe18697c895456f2";
+    private static final String WEATHER_KEY = "41cb48fa8c78499dbe18697c895456f2";
 
-    private static final String BASE_URL = "https://api.heweather.com";
+    private static final String AMAP_KEY = "942b2443eaa7e261747a1aadb93cbaef";
 
-    private static final int CITY_COUNT = 2567;
+    private static final String WEATHER_BASE_URL = "https://api.heweather.com";
 
-    private static final char DEGREE_SYMBOL = 0x00B0;
+    private static final String AMAP_BASE_URL = "http://restapi.amap.com";
 
-    public static String getKey() {
-        return KEY;
+    public static String getAmapBaseUrl() {
+        return AMAP_BASE_URL;
     }
 
-    public static String getBaseUrl() {
-        return BASE_URL;
+    public static String getWeatherKey() {
+        return WEATHER_KEY;
     }
 
-    public static int getCityCount() {
-        return CITY_COUNT;
+    public static String getWeatherBaseUrl() {
+        return WEATHER_BASE_URL;
+    }
+
+    public static String getAmapKey() {
+        return AMAP_KEY;
     }
 
     public static int getWeatherImage(String weatherCode, Context context) {
         return context.getResources().getIdentifier("img_" + weatherCode, "drawable", "com.example.yininghuang.weather");
     }
-
-    public static char getDegreeSymbol() {
-        return DEGREE_SYMBOL;
-    }
-
 
 }

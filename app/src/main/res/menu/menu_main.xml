@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/action_add_location"
-        android:icon="@drawable/ic_add_white_24dp"
+        android:icon="@drawable/ic_add_grey_700_24dp"
         android:title="添加地区"
         app:showAsAction="always" />
 </menu>

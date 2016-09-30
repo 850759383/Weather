@@ -17,11 +17,21 @@
 
             <TextView
                 android:id="@+id/cityTitle"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="?attr/actionBarSize"
-                android:gravity="center"
+                android:layout_centerHorizontal="true"
+                android:gravity="center_vertical"
                 android:text="@string/not_available"
-                android:textAppearance="@style/TextAppearance.AppCompat.Title" />
+                android:textSize="24sp"
+                android:typeface="normal"  />
+
+            <ImageView
+                android:id="@+id/locationOn"
+                android:layout_width="?attr/actionBarSize"
+                android:layout_height="?attr/actionBarSize"
+                android:layout_toLeftOf="@id/cityTitle"
+                android:padding="16dp"
+                android:src="@drawable/ic_location_on_grey_700_24dp" />
 
             <TextView
                 android:id="@+id/currentTemp"

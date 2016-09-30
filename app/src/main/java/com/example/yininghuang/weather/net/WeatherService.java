@@ -11,7 +11,7 @@ import rx.Observable;
  * Created by Yining Huang on 2016/9/22.
  */
 
-public interface RemoteWeatherService {
+public interface WeatherService {
     @GET("/x3/weather")
     Observable<WeatherList> getWeatherWithId(@Query("cityid") String cityId, @Query("key") String key);
 

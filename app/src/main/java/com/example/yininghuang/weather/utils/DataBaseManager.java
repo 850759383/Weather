@@ -46,7 +46,7 @@ public class DataBaseManager {
         if (cache == null) {
             insertCity(city);
         } else {
-            updateCity(city);
+            updateCity(city, "name");
         }
     }
 
@@ -58,11 +58,15 @@ public class DataBaseManager {
         database.endTransaction();
     }
 
-    public void updateCity(City city) {
+    public void updateCity(City city, String columnName) {
         ContentValues cv = new ContentValues();
         cv.put("updateTime", city.getUpdateTime());
         cv.put("weather", city.getWeather());
-        database.update("city", cv, "name = ?", new String[]{city.getName()});
+        database.update("city", cv, columnName + " = ?", new String[]{city.getName()});
+    }
+
+    public void deleteCity(String name) {
+        database.delete("city", "name = ?", new String[]{name});
     }
 
     public City queryCity(String name) {
@@ -78,6 +82,23 @@ public class DataBaseManager {
         }
         cursor.close();
         return city;
+    }
+
+    public List<City> queryCityWithPosition(int positioning) {
+        List<City> cityList = new ArrayList<>();
+        Cursor cursor = database.rawQuery("SELECT * FROM city WHERE positioning = ?", new String[]{String.valueOf(positioning)});
+        if (cursor.moveToFirst()) {
+            do {
+                City city = new City();
+                city.setName(cursor.getString(cursor.getColumnIndex("name")));
+                city.setUpdateTime(cursor.getString(cursor.getColumnIndex("updateTime")));
+                city.setWeather(cursor.getString(cursor.getColumnIndex("weather")));
+                city.setPositioning(cursor.getInt(cursor.getColumnIndex("positioning")));
+                cityList.add(city);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        return cityList;
     }
 
     public List<City> queryCityList() {

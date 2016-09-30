@@ -35,6 +35,16 @@ public class WeatherList {
         @SerializedName("aqi")
         private AirQuality airQuality;
 
+        public String getStatus() {
+            return status;
+        }
+
+        public void setStatus(String status) {
+            this.status = status;
+        }
+
+        private String status;
+
         public AirQuality getAirQuality() {
             return airQuality;
         }
