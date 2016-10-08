@@ -1,12 +1,17 @@
 <resources>
     <string name="app_name">Weather</string>
-    <string name="degree">\u00B0</string>
+    <string name="symbol_degree">\u00B0</string>
+    <string name="degree">%1$s\u00B0</string>
+    <string name="percent">%1$s</string>
+    <string name="km_per_hour">%1$skm/h</string>
     <string name="not_available">N/A</string>
     <string name="humidity">湿度</string>
     <string name="air_quality">空气质量</string>
     <string name="wind_speed">风速</string>
+    <string name="feel_temp">体感温度：%1$s\u00B0</string>
     <string name="data_provider">数据来源：heweather.com</string>
     <string name="updating">正在更新</string>
+    <string name="update_time">更新时间：%1$s</string>
 
     <string name="search">搜索城市</string>
 

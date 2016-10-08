@@ -49,7 +49,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignTop="@id/currentTemp"
                 android:layout_toRightOf="@id/currentTemp"
-                android:text="@string/degree"
+                android:text="@string/symbol_degree"
                 android:textSize="72sp"
                 android:typeface="normal" />
 

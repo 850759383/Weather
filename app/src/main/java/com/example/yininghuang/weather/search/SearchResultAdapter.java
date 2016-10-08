@@ -90,7 +90,7 @@ public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapte
 
         public void bindData(WeatherList.Weather weather, Context context) {
             cityNameText.setText(weather.getBasicCityInfo().getCityName());
-            cityTempText.setText(weather.getNowWeather().getTemperature() + context.getResources().getString(R.string.degree));
+            cityTempText.setText(context.getResources().getString(R.string.degree, weather.getNowWeather().getTemperature()));
             cityWeatherImage.setImageResource(Constants.getWeatherImage(weather.getNowWeather().getWeatherStatus().getWeatherCode(), context));
         }
     }
