@@ -43,59 +43,46 @@ import static com.example.yininghuang.weather.utils.Utils.formatCityName;
 public class WeatherPresenter implements WeatherContract.Presenter, LocationListener {
 
     private final WeatherContract.View weatherView;
+    private final Context context;
     private LocationManager locationManager;
     private String latestLocation;
-    private final Context context;
     private WeatherList.Weather weather;
     private Boolean isAutoLocation = true;
     private SubscriptionList subscriptionList = new SubscriptionList();
 
-    private static final String PREFERENCE_LOCATION = "location";
+    public static final String PREFERENCE_LOCATION = "location";
     private static final Long UPDATE_TIME_INTERVAL = 1000L * 60 * 60;
 
-    public WeatherPresenter(WeatherContract.View weatherView, Context context) {
+    public WeatherPresenter(WeatherContract.View weatherView, Context context, String requireLocation, Boolean isAutoLocation) {
         this.weatherView = weatherView;
         this.context = context.getApplicationContext();
+        this.isAutoLocation = isAutoLocation;
         locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-    }
-
-    public WeatherPresenter(WeatherContract.View weatherView, Context context, String requireLocation) {
-        this(weatherView, context);
         latestLocation = formatCityName(requireLocation);
-        isAutoLocation = false;
     }
 
     @Override
     public void init() {
-        if (isAutoLocation)
-            latestLocation = SharedPreferenceHelper.getStringPreference(context, PREFERENCE_LOCATION);
         City city = queryFromDB(latestLocation);
         if (city != null) {
             weather = new Gson().fromJson(city.getWeather(), WeatherList.Weather.class);
             weatherView.updateWeather(weather, city.getUpdateTime());
         }
-        if (isAutoLocation) {
-            requestLocationUpdate();
-        }
-        if (shouldUpdate()) {
-            fetchWeather();
-        }
+        update();
     }
 
     @Override
     public void update() {
-        if (isAutoLocation) {
-            requestLocationUpdate();
-        } else {
+        if (shouldUpdate()) {
             fetchWeather();
         }
+        requestLocationUpdate();
     }
 
     private void requestLocationUpdate() {
         if (!isAutoLocation)
             return;
 
-        weatherView.setBottomRefresh(true, "正在定位");
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             locationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, this, Looper.getMainLooper());
         }
@@ -150,7 +137,8 @@ public class WeatherPresenter implements WeatherContract.Presenter, LocationList
 
     @Override
     public void onLocationChanged(final Location location) {
-        Subscription subscription = analysisLocation(location).map(new Func1<AMapGeoCode, String>() {
+        Subscription subscription = analysisLocation(location)
+                .map(new Func1<AMapGeoCode, String>() {
             @Override
             public String call(AMapGeoCode amapGeoCode) {
                 if (amapGeoCode.getInfocode().equals("10000")) {
@@ -158,21 +146,21 @@ public class WeatherPresenter implements WeatherContract.Presenter, LocationList
                 }
                 return null;
             }
+        }).map(new Func1<String, String>() {
+            @Override
+            public String call(String s) {
+                return formatCityName(s);
+            }
         }).subscribe(new Action1<String>() {
             @Override
             public void call(String s) {
-                String city = formatCityName(s);
-                if (city != null) {
-                    if (city.equals(latestLocation) && shouldUpdate()) {
-                        fetchWeather();
-                    } else if (!city.equals(latestLocation)) {
-                        latestLocation = city;
-                        fetchWeather();
-                    } else {
-                        weatherView.setBottomRefresh(false, null);
-                    }
-                    if (latestLocation != null)
-                        SharedPreferenceHelper.setStringPreference(context, PREFERENCE_LOCATION, latestLocation);
+                System.out.println(s);
+                if (s != null && !s.equals(latestLocation)) {
+                    latestLocation = s;
+                    fetchWeather();
+                    SharedPreferenceHelper.setStringPreference(context, PREFERENCE_LOCATION, latestLocation);
+                } else {
+                    weatherView.setBottomRefresh(false, null);
                 }
             }
         }, new Action1<Throwable>() {

@@ -31,6 +31,7 @@ import com.example.yininghuang.weather.weather.WeatherActivity;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 /**
  * Created by Yining Huang on 2016/9/29.

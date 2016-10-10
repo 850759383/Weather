@@ -17,6 +17,7 @@ import com.example.yininghuang.weather.model.Weather.DailyForecast;
 import com.example.yininghuang.weather.model.Weather.WeatherList;
 import com.example.yininghuang.weather.net.Constants;
 import com.example.yininghuang.weather.utils.DateUtils;
+import com.example.yininghuang.weather.utils.SharedPreferenceHelper;
 
 import java.util.Date;
 
@@ -97,11 +98,10 @@ public class WeatherFragment extends Fragment implements WeatherContract.View {
         Bundle argument = getArguments();
         String name = argument.getString("city");
         isAutoLocation = argument.getBoolean("positioning");
-        if (isAutoLocation) {
-            presenter = new WeatherPresenter(this, getActivity());
-        } else {
-            presenter = new WeatherPresenter(this, getActivity(), name);
-        }
+        if (isAutoLocation)
+            name = SharedPreferenceHelper.getStringPreference(getActivity(), WeatherPresenter.PREFERENCE_LOCATION);
+
+        presenter = new WeatherPresenter(this, getActivity(), name, isAutoLocation);
     }
 
     @Override
