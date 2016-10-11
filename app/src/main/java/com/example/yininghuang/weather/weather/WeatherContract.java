@@ -22,7 +22,7 @@ public class WeatherContract {
 
         void updateWeather(WeatherList.Weather weather, String updateTime);
 
-        void setBottomRefresh(Boolean status, String msg);
+        void setBottomRefresh(Boolean status);
 
         void showMessage(String msg);
     }

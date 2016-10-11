@@ -19,7 +19,8 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("CREATE TABLE IF NOT EXISTS city(name TEXT PRIMARY KEY, updateTime TEXT, weather TEXT, positioning INTEGER)");
+        db.execSQL("CREATE TABLE IF NOT EXISTS saved(name TEXT PRIMARY KEY, updateTime TEXT, weather TEXT)");
+        db.execSQL("CREATE TABLE IF NOT EXISTS auto_location(name TEXT PRIMARY KEY, updateTime TEXT, weather TEXT)");
     }
 
     @Override

@@ -20,6 +20,7 @@ import com.example.yininghuang.weather.R;
 import com.example.yininghuang.weather.model.City;
 import com.example.yininghuang.weather.search.SearchActivity;
 import com.example.yininghuang.weather.utils.DataBaseManager;
+import com.example.yininghuang.weather.utils.SharedPreferenceHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,7 +55,8 @@ public class WeatherActivity extends AppCompatActivity implements NavigationAdap
         ButterKnife.bind(this);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
-        pagerLocation.addAll(getCityNameList());
+        pagerLocation.add(getAutoLocationName("正在定位"));
+        pagerLocation.addAll(getSavedCityName());
         recLocation.addAll(pagerLocation);
         weatherPagerAdapter = new WeatherPagerAdapter(getSupportFragmentManager(), pagerLocation);
         navigationAdapter = new NavigationAdapter(recLocation);
@@ -68,22 +70,31 @@ public class WeatherActivity extends AppCompatActivity implements NavigationAdap
         }
     }
 
-    private List<String> getCityNameList() {
-        List<String> name = new ArrayList<>();
-        List<City> cityList = DataBaseManager.getInstance().queryCityList();
-        if (!cityList.isEmpty()) {
-            for (City city : cityList) {
-                name.add(city.getName());
-            }
-        } else {
-            name.add("正在定位");
+    private List<String> getSavedCityName() {
+        List<String> nameList = new ArrayList<>();
+        List<City> cityList = DataBaseManager.getInstance().queryCityList(DataBaseManager.TABLE_SAVED);
+        for (City city : cityList) {
+            nameList.add(city.getName());
         }
-        return name;
+        return nameList;
+    }
+
+    private String getAutoLocationName(String defaultLocation) {
+        String d = SharedPreferenceHelper.getStringPreference(this, WeatherPresenter.PREFERENCE_DISTRICT);
+        String c = SharedPreferenceHelper.getStringPreference(this, WeatherPresenter.PREFERENCE_CITY);
+        City d1 = DataBaseManager.getInstance().queryCity(d, DataBaseManager.TABLE_AUTO_LOCATION);
+        if (d1 != null)
+            return d1.getName();
+        City c1 = DataBaseManager.getInstance().queryCity(c, DataBaseManager.TABLE_AUTO_LOCATION);
+        if (c1 != null)
+            return c1.getName();
+        return defaultLocation;
     }
 
     public void updateDrawerRec() {
         recLocation.clear();
-        recLocation.addAll(getCityNameList());
+        recLocation.add(getAutoLocationName("正在定位"));
+        recLocation.addAll(getSavedCityName());
         navigationAdapter.notifyDataSetChanged();
     }
 
@@ -117,21 +128,22 @@ public class WeatherActivity extends AppCompatActivity implements NavigationAdap
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         String location = intent.getStringExtra("city");
-        if (!pagerLocation.contains(location)) {
-            pagerLocation.add(location);
-            weatherPagerAdapter.notifyDataSetChanged();
+        pagerLocation.clear();
+        recLocation.clear();
+        pagerLocation.add(getAutoLocationName("正在定位"));
+        pagerLocation.addAll(getSavedCityName());
+        recLocation.addAll(pagerLocation);
+        weatherPagerAdapter.notifyDataSetChanged();
+        navigationAdapter.notifyDataSetChanged();
+        int index = 0;
+        for (String name : pagerLocation) {
+            index++;
+            if (index == 0)
+                continue;
+            if (name.equals(location))
+                break;
         }
-        if (!recLocation.contains(location)){
-            recLocation.add(location);
-            navigationAdapter.notifyDataSetChanged();
-        }
-        int index = pagerLocation.indexOf(location);
         viewPager.setCurrentItem(index, false);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
     }
 
     @Override
@@ -145,18 +157,18 @@ public class WeatherActivity extends AppCompatActivity implements NavigationAdap
     }
 
     @Override
-    public void onItemClick(String name) {
+    public void onDrawerItemClick(String name) {
         int index = pagerLocation.indexOf(name);
         viewPager.setCurrentItem(index, false);
         drawerLayout.closeDrawers();
     }
 
     @Override
-    public void onItemDelete(String name) {
+    public void onDrawerItemDelete(String name) {
         pagerLocation.remove(name);
         recLocation.remove(name);
         weatherPagerAdapter.notifyDataSetChanged();
         navigationAdapter.notifyDataSetChanged();
-        DataBaseManager.getInstance().deleteCity(name);
+        DataBaseManager.getInstance().deleteCity(name, DataBaseManager.TABLE_SAVED);
     }
 }

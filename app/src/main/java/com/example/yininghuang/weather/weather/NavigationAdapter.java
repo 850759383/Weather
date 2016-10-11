@@ -47,14 +47,14 @@ public class NavigationAdapter extends RecyclerView.Adapter<NavigationAdapter.Vi
             holder.getDeleteBtn().setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mOnNavigationItemClickListener.onItemDelete(name);
+                    mOnNavigationItemClickListener.onDrawerItemDelete(name);
                 }
             });
         }
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mOnNavigationItemClickListener.onItemClick(name);
+                mOnNavigationItemClickListener.onDrawerItemClick(name);
             }
         });
     }
@@ -72,9 +72,9 @@ public class NavigationAdapter extends RecyclerView.Adapter<NavigationAdapter.Vi
 
     interface OnNavigationItemClickListener {
 
-        void onItemClick(String name);
+        void onDrawerItemClick(String name);
 
-        void onItemDelete(String name);
+        void onDrawerItemDelete(String name);
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {

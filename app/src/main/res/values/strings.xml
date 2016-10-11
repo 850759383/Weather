@@ -2,7 +2,7 @@
     <string name="app_name">Weather</string>
     <string name="symbol_degree">\u00B0</string>
     <string name="degree">%1$s\u00B0</string>
-    <string name="percent">%1$s</string>
+    <string name="percent">%1$s%%</string>
     <string name="km_per_hour">%1$skm/h</string>
     <string name="not_available">N/A</string>
     <string name="humidity">湿度</string>

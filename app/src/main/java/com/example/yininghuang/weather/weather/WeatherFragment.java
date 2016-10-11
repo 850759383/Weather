@@ -96,12 +96,14 @@ public class WeatherFragment extends Fragment implements WeatherContract.View {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Bundle argument = getArguments();
-        String name = argument.getString("city");
+        String d = argument.getString("city");
+        String c = null;
         isAutoLocation = argument.getBoolean("positioning");
-        if (isAutoLocation)
-            name = SharedPreferenceHelper.getStringPreference(getActivity(), WeatherPresenter.PREFERENCE_LOCATION);
-
-        presenter = new WeatherPresenter(this, getActivity(), name, isAutoLocation);
+        if (isAutoLocation) {
+            d = SharedPreferenceHelper.getStringPreference(getActivity(), WeatherPresenter.PREFERENCE_DISTRICT);
+            c = SharedPreferenceHelper.getStringPreference(getActivity(), WeatherPresenter.PREFERENCE_CITY);
+        }
+        presenter = new WeatherPresenter(this, getActivity(), d, c, isAutoLocation);
     }
 
     @Override
@@ -200,9 +202,7 @@ public class WeatherFragment extends Fragment implements WeatherContract.View {
     }
 
     @Override
-    public void setBottomRefresh(Boolean status, String msg) {
-        if (msg != null)
-            updateMessage.setText(msg);
+    public void setBottomRefresh(Boolean status) {
         isRefresh = status;
         if (status) {
             updateTimeText.setVisibility(View.GONE);

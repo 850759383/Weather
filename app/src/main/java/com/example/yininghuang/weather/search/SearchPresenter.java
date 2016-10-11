@@ -63,14 +63,8 @@ public class SearchPresenter implements SearchContract.Presenter {
     public void saveToDB(WeatherList.Weather weather) {
         City c = new City(weather.getBasicCityInfo().getCityName(),
                 Long.toString(System.currentTimeMillis()),
-                new Gson().toJson(weather),
-                DataBaseManager.UN_POSITIONING);
-        City city = DataBaseManager.getInstance().queryCity(weather.getBasicCityInfo().getCityName());
-        if (city == null) {
-            DataBaseManager.getInstance().insertCity(c);
-        } else if (city.getPositioning() != DataBaseManager.POSITIONING) {
-            DataBaseManager.getInstance().updateCity(c, "name");
-        }
+                new Gson().toJson(weather));
+        DataBaseManager.getInstance().addOrUpdateCity(c, DataBaseManager.TABLE_SAVED);
     }
 
     @Override
