@@ -250,6 +250,7 @@ public class WeatherPresenter implements WeatherContract.Presenter, LocationList
     private Boolean shouldUpdate() {
         return mWeather == null ||
                 System.currentTimeMillis() - DateUtils.getTime(mWeather.getBasicCityInfo().getUpdateTime().getLocalTime()).getTime() > UPDATE_TIME_INTERVAL;
+        
     }
 
     private Boolean checkPermission() {
