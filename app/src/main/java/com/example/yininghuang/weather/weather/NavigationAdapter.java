@@ -1,5 +1,7 @@
 package com.example.yininghuang.weather.weather;
 
+import android.content.Context;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,11 +22,15 @@ import butterknife.ButterKnife;
 
 public class NavigationAdapter extends RecyclerView.Adapter<NavigationAdapter.ViewHolder> {
 
-    private List<String> cities;
+    private List<String> mCities;
+    private Context mContext;
     private OnNavigationItemClickListener mOnNavigationItemClickListener;
 
-    public NavigationAdapter(List<String> cities) {
-        this.cities = cities;
+    private int selectedIndex = 0;
+
+    public NavigationAdapter(Context context, List<String> cities) {
+        this.mContext = context.getApplicationContext();
+        this.mCities = cities;
     }
 
     @Override
@@ -34,8 +40,8 @@ public class NavigationAdapter extends RecyclerView.Adapter<NavigationAdapter.Vi
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
-        final String name = cities.get(position);
+    public void onBindViewHolder(final ViewHolder holder, int position) {
+        final String name = mCities.get(position);
         holder.getCityNameText().setText(name);
         ImageView deleteBtn = holder.getDeleteBtn();
         if (position == 0) {
@@ -47,21 +53,31 @@ public class NavigationAdapter extends RecyclerView.Adapter<NavigationAdapter.Vi
             holder.getDeleteBtn().setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mOnNavigationItemClickListener.onDrawerItemDelete(name);
+                    mOnNavigationItemClickListener.onDrawerItemDelete(holder.getAdapterPosition());
                 }
             });
+        }
+        if (position == selectedIndex) {
+            holder.itemView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.colorItemSelected));
+        } else {
+            holder.itemView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.white));
         }
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mOnNavigationItemClickListener.onDrawerItemClick(name);
+                mOnNavigationItemClickListener.onDrawerItemClick(holder.getAdapterPosition());
             }
         });
     }
 
+    public void setSelectedIndex(int index) {
+        this.selectedIndex = index;
+        notifyDataSetChanged();
+    }
+
     @Override
     public int getItemCount() {
-        return cities.size();
+        return mCities.size();
     }
 
     public void setOnNavigationItemClickListener(OnNavigationItemClickListener listener) {
@@ -72,9 +88,9 @@ public class NavigationAdapter extends RecyclerView.Adapter<NavigationAdapter.Vi
 
     interface OnNavigationItemClickListener {
 
-        void onDrawerItemClick(String name);
+        void onDrawerItemClick(int index);
 
-        void onDrawerItemDelete(String name);
+        void onDrawerItemDelete(int index);
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {

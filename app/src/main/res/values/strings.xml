@@ -11,9 +11,13 @@
     <string name="feel_temp">体感温度：%1$s\u00B0</string>
     <string name="data_provider">数据来源：heweather.com</string>
     <string name="updating">正在更新</string>
+    <string name="positioning">正在定位</string>
     <string name="update_time">更新时间：%1$s</string>
+    <string name="network_error">网络错误</string>
+    <string name="analysis_location_failed">"地理位置解析失败"</string>
 
     <string name="search">搜索城市</string>
+    <string name="city_not_found">未找到城市</string>
 
     <string name="save_location">我的已保存位置</string>
 </resources>

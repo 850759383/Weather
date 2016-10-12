@@ -16,6 +16,7 @@ import com.example.yininghuang.weather.R;
 import com.example.yininghuang.weather.model.Weather.DailyForecast;
 import com.example.yininghuang.weather.model.Weather.WeatherList;
 import com.example.yininghuang.weather.net.Constants;
+import com.example.yininghuang.weather.utils.DataBaseManager;
 import com.example.yininghuang.weather.utils.DateUtils;
 import com.example.yininghuang.weather.utils.SharedPreferenceHelper;
 
@@ -27,35 +28,35 @@ import butterknife.ButterKnife;
 public class WeatherFragment extends Fragment implements WeatherContract.View {
 
     @BindView(R.id.cityTitle)
-    TextView cityTitle;
+    TextView mCityTitle;
     @BindView(R.id.locationOn)
-    ImageView locationOnIcon;
+    ImageView mLocationOnIcon;
     @BindView(R.id.weatherImage)
-    ImageView weatherImage;
+    ImageView mWeatherImageView;
     @BindView(R.id.weatherText)
-    TextView weatherText;
+    TextView mWeatherTextView;
     @BindView(R.id.updateTime)
-    TextView updateTimeText;
+    TextView mUpdateTimeTextView;
     @BindView(R.id.maxTemp)
-    TextView maxTemp;
+    TextView mMaxTempTextView;
     @BindView(R.id.minTemp)
-    TextView minTemp;
+    TextView mMinTempTextView;
     @BindView(R.id.currentTemp)
-    TextView currentTemp;
+    TextView mCurrentTempTextView;
     @BindView(R.id.feelTemp)
-    TextView feelTemp;
+    TextView mFeelTempTextView;
     @BindView(R.id.humidity)
-    TextView humidity;
+    TextView mHumidityTextView;
     @BindView(R.id.windSpeed)
-    TextView windSpeed;
+    TextView mWindSpeedTextView;
     @BindView(R.id.airQuality)
-    TextView airQuality;
+    TextView mAirQualityTextView;
     @BindView(R.id.swipeRefreshLayout)
-    SwipeRefreshLayout swipeRefreshLayout;
+    SwipeRefreshLayout mSwipeLayout;
     @BindView(R.id.bottomRefresh)
-    LinearLayout bottomRefresh;
+    LinearLayout mBtmRefreshLayout;
     @BindView(R.id.updateMessage)
-    TextView updateMessage;
+    TextView mUpdateMsgTextView;
 
     @BindView(R.id.date1)
     TextView forecastDate1;
@@ -103,7 +104,7 @@ public class WeatherFragment extends Fragment implements WeatherContract.View {
             d = SharedPreferenceHelper.getStringPreference(getActivity(), WeatherPresenter.PREFERENCE_DISTRICT);
             c = SharedPreferenceHelper.getStringPreference(getActivity(), WeatherPresenter.PREFERENCE_CITY);
         }
-        presenter = new WeatherPresenter(this, getActivity(), d, c, isAutoLocation);
+        presenter = new WeatherPresenter(this, getActivity(), DataBaseManager.getInstance(), d, c, isAutoLocation);
     }
 
     @Override
@@ -120,40 +121,39 @@ public class WeatherFragment extends Fragment implements WeatherContract.View {
     }
 
     private void initView() {
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+        if (isAutoLocation)
+            mLocationOnIcon.setVisibility(View.VISIBLE);
+        else
+            mLocationOnIcon.setVisibility(View.GONE);
+        mSwipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
                 if (!isRefresh)
                     presenter.update();
-                swipeRefreshLayout.setRefreshing(false);
+                mSwipeLayout.setRefreshing(false);
             }
         });
-        if (isAutoLocation) {
-            locationOnIcon.setVisibility(View.VISIBLE);
-        } else {
-            locationOnIcon.setVisibility(View.GONE);
-        }
         presenter.init();
     }
 
     @Override
     public void updateWeather(WeatherList.Weather weather, String updateTime) {
         this.updateTime = Long.valueOf(updateTime);
-        updateTimeText.setText(getString(R.string.update_time, DateUtils.format(new Date(this.updateTime))));
-        cityTitle.setText(weather.getBasicCityInfo().getCityName());
+        mUpdateTimeTextView.setText(getString(R.string.update_time, DateUtils.format(new Date(this.updateTime))));
+        mCityTitle.setText(weather.getBasicCityInfo().getCityName());
         DailyForecast today = weather.getDailyForecasts().get(0);
-        maxTemp.setText(getString(R.string.degree, today.getTemperature().getMaxTemperature()));
-        minTemp.setText(getString(R.string.degree, today.getTemperature().getMinTemperature()));
-        currentTemp.setText(weather.getNowWeather().getTemperature());
-        weatherText.setText(weather.getNowWeather().getWeatherStatus().getWeatherName());
-        weatherImage.setImageResource(Constants.getWeatherImage(weather.getNowWeather().getWeatherStatus().getWeatherCode(), getActivity()));
-        feelTemp.setText(getString(R.string.feel_temp, weather.getNowWeather().getFeelTemperature()));
-        humidity.setText(getString(R.string.percent, weather.getNowWeather().getHumidity()));
-        windSpeed.setText(getString(R.string.km_per_hour, weather.getNowWeather().getWind().getSpeed()));
+        mMaxTempTextView.setText(getString(R.string.degree, today.getTemperature().getMaxTemperature()));
+        mMinTempTextView.setText(getString(R.string.degree, today.getTemperature().getMinTemperature()));
+        mCurrentTempTextView.setText(weather.getNowWeather().getTemperature());
+        mWeatherTextView.setText(weather.getNowWeather().getWeatherStatus().getWeatherName());
+        mWeatherImageView.setImageResource(Constants.getWeatherImage(weather.getNowWeather().getWeatherStatus().getWeatherCode(), getActivity()));
+        mFeelTempTextView.setText(getString(R.string.feel_temp, weather.getNowWeather().getFeelTemperature()));
+        mHumidityTextView.setText(getString(R.string.percent, weather.getNowWeather().getHumidity()));
+        mWindSpeedTextView.setText(getString(R.string.km_per_hour, weather.getNowWeather().getWind().getSpeed()));
         if (weather.getBasicCityInfo().getCountry().equals("中国")) {
-            airQuality.setText(weather.getAirQuality().getCity().getQlty());
+            mAirQualityTextView.setText(weather.getAirQuality().getCity().getQlty());
         } else {
-            airQuality.setText(getString(R.string.not_available));
+            mAirQualityTextView.setText(getString(R.string.not_available));
         }
         if (isAutoLocation) {
             ((WeatherActivity) getActivity()).updateDrawerRec();
@@ -180,19 +180,13 @@ public class WeatherFragment extends Fragment implements WeatherContract.View {
         forecastDate1.setText(DateUtils.getWeekOfYear(DateUtils.getTime2(forecast1.getDate())));
         forecastDate2.setText(DateUtils.getWeekOfYear(DateUtils.getTime2(forecast2.getDate())));
         forecastDate3.setText(DateUtils.getWeekOfYear(DateUtils.getTime2(forecast3.getDate())));
-
     }
 
     @Override
     public void onResume() {
         super.onResume();
         if (updateTime != -1)
-            updateTimeText.setText(getString(R.string.update_time, DateUtils.format(new Date(this.updateTime))));
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
+            mUpdateTimeTextView.setText(getString(R.string.update_time, DateUtils.format(new Date(this.updateTime))));
     }
 
     @Override
@@ -205,11 +199,11 @@ public class WeatherFragment extends Fragment implements WeatherContract.View {
     public void setBottomRefresh(Boolean status) {
         isRefresh = status;
         if (status) {
-            updateTimeText.setVisibility(View.GONE);
-            bottomRefresh.setVisibility(View.VISIBLE);
+            mUpdateTimeTextView.setVisibility(View.GONE);
+            mBtmRefreshLayout.setVisibility(View.VISIBLE);
         } else {
-            updateTimeText.setVisibility(View.VISIBLE);
-            bottomRefresh.setVisibility(View.GONE);
+            mUpdateTimeTextView.setVisibility(View.VISIBLE);
+            mBtmRefreshLayout.setVisibility(View.GONE);
         }
     }
 

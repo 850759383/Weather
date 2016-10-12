@@ -11,6 +11,7 @@ import android.os.Looper;
 import android.support.v4.app.ActivityCompat;
 import android.text.TextUtils;
 
+import com.example.yininghuang.weather.R;
 import com.example.yininghuang.weather.model.AMapGeoCode;
 import com.example.yininghuang.weather.model.City;
 import com.example.yininghuang.weather.model.Weather.WeatherList;
@@ -23,7 +24,6 @@ import com.example.yininghuang.weather.utils.DateUtils;
 import com.example.yininghuang.weather.utils.SharedPreferenceHelper;
 import com.google.gson.Gson;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -44,10 +44,11 @@ import static com.example.yininghuang.weather.utils.Utils.formatCityName;
 
 public class WeatherPresenter implements WeatherContract.Presenter, LocationListener {
 
-    private final WeatherContract.View weatherView;
+    private final WeatherContract.View mWeatherView;
     private final Context context;
-    private LocationManager locationManager;
-    private WeatherList.Weather weather;
+    private LocationManager mLocationManager;
+    private WeatherList.Weather mWeather;
+    private DataBaseManager mDataBaseManager;
     private Boolean isAutoLocation = true;
     private SubscriptionList subscriptionList = new SubscriptionList();
     private Subscription positionTimer;
@@ -61,13 +62,14 @@ public class WeatherPresenter implements WeatherContract.Presenter, LocationList
     private static final long MAX_POSITION_INTERVAL = 1000 * 8;
     private static final long UPDATE_TIME_INTERVAL = 1000 * 60 * 60;
 
-    public WeatherPresenter(WeatherContract.View weatherView, Context context, String district, String city, Boolean isAutoLocation) {
-        this.weatherView = weatherView;
+    public WeatherPresenter(WeatherContract.View weatherView, Context context, DataBaseManager dataBaseManager, String district, String city, Boolean isAutoLocation) {
+        this.mWeatherView = weatherView;
         this.context = context.getApplicationContext();
+        this.mDataBaseManager = dataBaseManager;
         this.isAutoLocation = isAutoLocation;
-        locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         this.district = formatCityName(district);
         this.city = city;
+        mLocationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         if (isAutoLocation)
             tableName = DataBaseManager.TABLE_AUTO_LOCATION;
         else
@@ -78,8 +80,8 @@ public class WeatherPresenter implements WeatherContract.Presenter, LocationList
     public void init() {
         City city = queryFromDB();
         if (city != null) {
-            weather = new Gson().fromJson(city.getWeather(), WeatherList.Weather.class);
-            weatherView.updateWeather(weather, city.getUpdateTime());
+            mWeather = new Gson().fromJson(city.getWeather(), WeatherList.Weather.class);
+            mWeatherView.updateWeather(mWeather, city.getUpdateTime());
         }
         update();
     }
@@ -96,34 +98,31 @@ public class WeatherPresenter implements WeatherContract.Presenter, LocationList
         if (!isAutoLocation)
             return;
 
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            weatherView.setBottomRefresh(true);
-            positionTimer = Observable.timer(MAX_POSITION_INTERVAL, TimeUnit.MILLISECONDS)
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Action1<Long>() {
+        mWeatherView.setBottomRefresh(true);
+        if (checkPermission())
+            mLocationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, this, Looper.getMainLooper());
+        positionTimer = Observable.timer(MAX_POSITION_INTERVAL, TimeUnit.MILLISECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Long>() {
                         @Override
                         public void call(Long aLong) {
-                            System.out.println("超时");
-                            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                                onLocationChanged(locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER));
-                            }
+                            if (checkPermission())
+                                onLocationChanged(mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER));
                         }
                     });
-            locationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, this, Looper.getMainLooper());
-        }
     }
 
     private void fetchWeather() {
         if (TextUtils.isEmpty(district))
             return;
 
-        weatherView.setBottomRefresh(true);
-        Subscription subscription = getWeatherObserver(district)
+        mWeatherView.setBottomRefresh(true);
+        Subscription subscription = getWeatherObservable(district)
                 .flatMap(new Func1<WeatherList.Weather, Observable<WeatherList.Weather>>() {
                     @Override
                     public Observable<WeatherList.Weather> call(WeatherList.Weather weather) {
                         if (weather.getStatus().equals("unknown city") && city != null)
-                            return getWeatherObserver(city);
+                            return getWeatherObservable(city);
                         return Observable.just(weather);
                     }
                 })
@@ -133,30 +132,30 @@ public class WeatherPresenter implements WeatherContract.Presenter, LocationList
                     @Override
                     public void call(WeatherList.Weather weather) {
                         if (weather.getStatus().equals("ok")) {
-                            weatherView.setBottomRefresh(false);
+                            mWeather = weather;
+                            mWeatherView.setBottomRefresh(false);
                             String currentTime = Long.toString(System.currentTimeMillis());
-                            WeatherPresenter.this.weather = weather;
                             saveToDB(weather, currentTime);
-                            weatherView.updateWeather(weather, currentTime);
+                            mWeatherView.updateWeather(weather, currentTime);
                         } else {
-                            weatherView.setBottomRefresh(false);
-                            weatherView.showMessage(weather.getStatus());
+                            mWeatherView.setBottomRefresh(false);
+                            mWeatherView.showMessage(weather.getStatus());
                         }
                     }
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-                        weatherView.setBottomRefresh(false);
-                        weatherView.showMessage("网络错误");
+                        mWeatherView.setBottomRefresh(false);
+                        mWeatherView.showMessage(context.getString(R.string.network_error));
                         throwable.printStackTrace();
                     }
                 });
         subscriptionList.add(subscription);
     }
 
-    private Observable<WeatherList.Weather> getWeatherObserver(String cityName) {
-        return RetrofitHelper.createRetrofit(WeatherService.class, Constants.getWeatherBaseUrl())
-                .getWeatherWithName(cityName, Constants.getWeatherKey())
+    private Observable<WeatherList.Weather> getWeatherObservable(String cityName) {
+        return RetrofitHelper.createRetrofit(WeatherService.class, Constants.WEATHER_BASE_URL)
+                .getWeatherWithName(cityName, Constants.WEATHER_KEY)
                 .map(new Func1<WeatherList, WeatherList.Weather>() {
                     @Override
                     public WeatherList.Weather call(WeatherList weatherList) {
@@ -167,8 +166,8 @@ public class WeatherPresenter implements WeatherContract.Presenter, LocationList
 
     @Override
     public void onStop() {
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED)
-            locationManager.removeUpdates(this);
+        if (checkPermission())
+            mLocationManager.removeUpdates(this);
         subscriptionList.unsubscribe();
     }
 
@@ -179,7 +178,7 @@ public class WeatherPresenter implements WeatherContract.Presenter, LocationList
             positionTimer = null;
         }
         if (location == null) {
-            weatherView.setBottomRefresh(false);
+            mWeatherView.setBottomRefresh(false);
             return;
         }
 
@@ -204,21 +203,20 @@ public class WeatherPresenter implements WeatherContract.Presenter, LocationList
                         city = s.get("city");
                         SharedPreferenceHelper.setStringPreference(context, PREFERENCE_CITY, city);
                         String d = s.get("district");
-                        System.out.println(s);
                         if (d != null && !d.equals(district)) {
                             district = d;
                             fetchWeather();
                             SharedPreferenceHelper.setStringPreference(context, PREFERENCE_DISTRICT, district);
                         } else {
-                            weatherView.setBottomRefresh(false);
+                            mWeatherView.setBottomRefresh(false);
                         }
                     }
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
                         throwable.printStackTrace();
-                        weatherView.setBottomRefresh(false);
-                        weatherView.showMessage("地理位置解析失败");
+                        mWeatherView.setBottomRefresh(false);
+                        mWeatherView.showMessage(context.getString(R.string.analysis_location_failed));
                     }
                 });
         subscriptionList.add(subscription);
@@ -227,39 +225,35 @@ public class WeatherPresenter implements WeatherContract.Presenter, LocationList
     private Observable<AMapGeoCode> analysisLocation(Location location) {
         Double lng = location.getLongitude();
         Double lat = location.getLatitude();
-        return RetrofitHelper.createRetrofit(LocationAnalysisService.class, Constants.getAmapBaseUrl())
-                .analysis(Constants.getAmapKey(), lng.toString() + "," + lat)
+        return RetrofitHelper.createRetrofit(LocationAnalysisService.class, Constants.AMAP_BASE_URL)
+                .analysis(Constants.AMAP_KEY, lng.toString() + "," + lat)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
     private void saveToDB(WeatherList.Weather weather, String updateTime) {
-        DataBaseManager.getInstance()
-                .addOrUpdateCity(new City(weather.getBasicCityInfo().getCityName(), updateTime, new Gson().toJson(weather)), tableName);
+        mDataBaseManager.addOrUpdateCity(new City(weather.getBasicCityInfo().getCityName(), updateTime, new Gson().toJson(weather)), tableName);
     }
 
     private City queryFromDB() {
         if (district != null) {
-            City d = DataBaseManager.getInstance().queryCity(district, tableName);
+            City d = mDataBaseManager.queryCity(district, tableName);
             if (d != null)
                 return d;
         }
         if (city != null) {
-            return DataBaseManager.getInstance().queryCity(city, tableName);
+            mDataBaseManager.queryCity(city, tableName);
         }
         return null;
     }
 
     private Boolean shouldUpdate() {
-        if (weather != null) {
-            Date weatherTime = DateUtils.getTime(weather.getBasicCityInfo().getUpdateTime().getLocalTime());
-            if (weatherTime != null && System.currentTimeMillis() - weatherTime.getTime() > UPDATE_TIME_INTERVAL) {
-                return true;
-            }
-        } else {
-            return true;
-        }
-        return false;
+        return mWeather == null ||
+                System.currentTimeMillis() - DateUtils.getTime(mWeather.getBasicCityInfo().getUpdateTime().getLocalTime()).getTime() > UPDATE_TIME_INTERVAL;
+    }
+
+    private Boolean checkPermission() {
+        return ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
 
     @Override

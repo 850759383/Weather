@@ -1,10 +1,10 @@
 package com.example.yininghuang.weather.search;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -22,16 +22,15 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.yininghuang.weather.R;
 import com.example.yininghuang.weather.model.Weather.WeatherList;
+import com.example.yininghuang.weather.utils.DataBaseManager;
 import com.example.yininghuang.weather.utils.Utils;
 import com.example.yininghuang.weather.weather.WeatherActivity;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 
 /**
  * Created by Yining Huang on 2016/9/29.
@@ -40,19 +39,19 @@ import butterknife.OnClick;
 public class SearchFragment extends Fragment implements SearchContract.View, SearchResultAdapter.OnItemClickListener {
 
     @BindView(R.id.toolbar)
-    Toolbar toolbar;
+    Toolbar mToolbar;
 
     @BindView(R.id.searchText)
-    EditText searchText;
+    EditText mSearchEditText;
 
     @BindView(R.id.resultRec)
-    RecyclerView resultRec;
+    RecyclerView mResultRec;
 
     @BindView(R.id.swipeRefreshLayout)
-    SwipeRefreshLayout swipeRefreshLayout;
+    SwipeRefreshLayout mSwipeLayout;
 
-    private SearchPresenter presenter;
-    private SearchResultAdapter adapter;
+    private SearchPresenter mPresenter;
+    private SearchResultAdapter mAdapter;
 
     public static SearchFragment newInstance() {
         return new SearchFragment();
@@ -68,7 +67,7 @@ public class SearchFragment extends Fragment implements SearchContract.View, Sea
 
     @Override
     public void setRefreshStatus(final Boolean active) {
-        swipeRefreshLayout.setRefreshing(active);
+        mSwipeLayout.setRefreshing(active);
     }
 
     @Override
@@ -78,17 +77,17 @@ public class SearchFragment extends Fragment implements SearchContract.View, Sea
     }
 
     private void initView() {
-        ((SearchActivity) getActivity()).setSupportActionBar(toolbar);
+        ((SearchActivity) getActivity()).setSupportActionBar(mToolbar);
         ((SearchActivity) getActivity()).getSupportActionBar().setDefaultDisplayHomeAsUpEnabled(true);
         ((SearchActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        swipeRefreshLayout.setEnabled(false);
+        mSwipeLayout.setEnabled(false);
         setHasOptionsMenu(true);
-        adapter = new SearchResultAdapter(getActivity());
-        adapter.setOnItemClickListener(this);
-        resultRec.setLayoutManager(new LinearLayoutManager(getActivity()));
-        resultRec.setAdapter(adapter);
-        presenter = new SearchPresenter(this);
-        searchText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+        mAdapter = new SearchResultAdapter(getActivity());
+        mAdapter.setOnItemClickListener(this);
+        mResultRec.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mResultRec.setAdapter(mAdapter);
+        mPresenter = new SearchPresenter(this, DataBaseManager.getInstance());
+        mSearchEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_SEARCH) {
@@ -122,9 +121,9 @@ public class SearchFragment extends Fragment implements SearchContract.View, Sea
     }
 
     private void performSearch() {
-        String city = Utils.formatCityName(searchText.getText().toString());
-        if (!TextUtils.isEmpty(city) && !swipeRefreshLayout.isRefreshing()) {
-            presenter.search(city);
+        String city = Utils.formatCityName(mSearchEditText.getText().toString());
+        if (!TextUtils.isEmpty(city) && !mSwipeLayout.isRefreshing()) {
+            mPresenter.search(city);
             InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(getView().getWindowToken(), 0);
         }
@@ -133,21 +132,20 @@ public class SearchFragment extends Fragment implements SearchContract.View, Sea
     @Override
     public void onPause() {
         super.onPause();
-        presenter.onStop();
+        mPresenter.onStop();
     }
 
     @Override
     public void setSearchResult(@Nullable WeatherList.Weather weather) {
-        if (weather != null) {
-            adapter.addWeather(weather);
-        } else {
-            Toast.makeText(getActivity(), "未找到城市", Toast.LENGTH_SHORT).show();
-        }
+        if (weather != null)
+            mAdapter.addWeather(weather);
+        else
+            Snackbar.make(getView(), R.string.city_not_found, Snackbar.LENGTH_SHORT).show();
     }
 
     @Override
     public void onItemClick(WeatherList.Weather weather) {
-        presenter.saveToDB(weather);
+        mPresenter.saveToDB(weather);
         Intent intent = new Intent(getActivity(), WeatherActivity.class);
         intent.putExtra("city", weather.getBasicCityInfo().getCityName());
         startActivity(intent);

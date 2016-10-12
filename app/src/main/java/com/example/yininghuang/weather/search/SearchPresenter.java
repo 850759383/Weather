@@ -20,18 +20,20 @@ import rx.schedulers.Schedulers;
 
 public class SearchPresenter implements SearchContract.Presenter {
 
-    private Subscription subscription;
-    private SearchContract.View searchView;
+    private Subscription mSubscription;
+    private SearchContract.View mSearchView;
+    private DataBaseManager mDataBaseManager;
 
-    public SearchPresenter(SearchContract.View searchView) {
-        this.searchView = searchView;
+    public SearchPresenter(SearchContract.View searchView, DataBaseManager dataBaseManager) {
+        this.mSearchView = searchView;
+        this.mDataBaseManager = dataBaseManager;
     }
 
     @Override
     public void search(String city) {
-        searchView.setRefreshStatus(true);
-        subscription = RetrofitHelper.createRetrofit(WeatherService.class, Constants.getWeatherBaseUrl())
-                .getWeatherWithName(city, Constants.getWeatherKey())
+        mSearchView.setRefreshStatus(true);
+        mSubscription = RetrofitHelper.createRetrofit(WeatherService.class, Constants.WEATHER_BASE_URL)
+                .getWeatherWithName(city, Constants.WEATHER_KEY)
                 .map(new Func1<WeatherList, WeatherList.Weather>() {
                     @Override
                     public WeatherList.Weather call(WeatherList weatherList) {
@@ -43,18 +45,18 @@ public class SearchPresenter implements SearchContract.Presenter {
                     @Override
                     public void call(WeatherList.Weather weather) {
                         if (weather.getStatus().equals("ok")) {
-                            searchView.setSearchResult(weather);
-                            searchView.setRefreshStatus(false);
+                            mSearchView.setSearchResult(weather);
+                            mSearchView.setRefreshStatus(false);
                         } else {
-                            searchView.setSearchResult(null);
-                            searchView.setRefreshStatus(false);
+                            mSearchView.setSearchResult(null);
+                            mSearchView.setRefreshStatus(false);
                         }
                     }
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-                        searchView.setSearchResult(null);
-                        searchView.setRefreshStatus(false);
+                        mSearchView.setSearchResult(null);
+                        mSearchView.setRefreshStatus(false);
                     }
                 });
     }
@@ -64,12 +66,12 @@ public class SearchPresenter implements SearchContract.Presenter {
         City c = new City(weather.getBasicCityInfo().getCityName(),
                 Long.toString(System.currentTimeMillis()),
                 new Gson().toJson(weather));
-        DataBaseManager.getInstance().addOrUpdateCity(c, DataBaseManager.TABLE_SAVED);
+        mDataBaseManager.addOrUpdateCity(c, DataBaseManager.TABLE_SAVED);
     }
 
     @Override
     public void onStop() {
-        if (subscription != null)
-            subscription.unsubscribe();
+        if (mSubscription != null)
+            mSubscription.unsubscribe();
     }
 }

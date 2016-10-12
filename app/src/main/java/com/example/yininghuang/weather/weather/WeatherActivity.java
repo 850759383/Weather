@@ -28,7 +28,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class WeatherActivity extends AppCompatActivity implements NavigationAdapter.OnNavigationItemClickListener {
+public class WeatherActivity extends AppCompatActivity implements NavigationAdapter.OnNavigationItemClickListener, ViewPager.OnPageChangeListener {
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -59,7 +59,7 @@ public class WeatherActivity extends AppCompatActivity implements NavigationAdap
         pagerLocation.addAll(getSavedCityName());
         recLocation.addAll(pagerLocation);
         weatherPagerAdapter = new WeatherPagerAdapter(getSupportFragmentManager(), pagerLocation);
-        navigationAdapter = new NavigationAdapter(recLocation);
+        navigationAdapter = new NavigationAdapter(this, recLocation);
         navigationAdapter.setOnNavigationItemClickListener(this);
         navRec.setLayoutManager(new LinearLayoutManager(this));
         navRec.setAdapter(navigationAdapter);
@@ -67,6 +67,7 @@ public class WeatherActivity extends AppCompatActivity implements NavigationAdap
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSION_CODE);
         else {
             viewPager.setAdapter(weatherPagerAdapter);
+            viewPager.addOnPageChangeListener(this);
         }
     }
 
@@ -130,7 +131,7 @@ public class WeatherActivity extends AppCompatActivity implements NavigationAdap
         String location = intent.getStringExtra("city");
         pagerLocation.clear();
         recLocation.clear();
-        pagerLocation.add(getAutoLocationName("正在定位"));
+        pagerLocation.add(getAutoLocationName(getString(R.string.positioning)));
         pagerLocation.addAll(getSavedCityName());
         recLocation.addAll(pagerLocation);
         weatherPagerAdapter.notifyDataSetChanged();
@@ -144,6 +145,7 @@ public class WeatherActivity extends AppCompatActivity implements NavigationAdap
                 break;
         }
         viewPager.setCurrentItem(index, false);
+        navigationAdapter.setSelectedIndex(index);
     }
 
     @Override
@@ -151,24 +153,40 @@ public class WeatherActivity extends AppCompatActivity implements NavigationAdap
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == PERMISSION_CODE && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             viewPager.setAdapter(weatherPagerAdapter);
+            viewPager.addOnPageChangeListener(this);
         } else {
             finish();
         }
     }
 
     @Override
-    public void onDrawerItemClick(String name) {
-        int index = pagerLocation.indexOf(name);
+    public void onDrawerItemClick(int index) {
         viewPager.setCurrentItem(index, false);
+        navigationAdapter.setSelectedIndex(index);
         drawerLayout.closeDrawers();
     }
 
     @Override
-    public void onDrawerItemDelete(String name) {
-        pagerLocation.remove(name);
-        recLocation.remove(name);
+    public void onDrawerItemDelete(int index) {
+        DataBaseManager.getInstance().deleteCity(pagerLocation.get(index), DataBaseManager.TABLE_SAVED);
+        pagerLocation.remove(index);
+        recLocation.remove(index);
         weatherPagerAdapter.notifyDataSetChanged();
         navigationAdapter.notifyDataSetChanged();
-        DataBaseManager.getInstance().deleteCity(name, DataBaseManager.TABLE_SAVED);
+    }
+
+    @Override
+    public void onPageSelected(int position) {
+        navigationAdapter.setSelectedIndex(position);
+    }
+
+    @Override
+    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+    }
+
+    @Override
+    public void onPageScrollStateChanged(int state) {
+
     }
 }

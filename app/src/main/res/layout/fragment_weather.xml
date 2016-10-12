@@ -21,7 +21,7 @@
                 android:layout_height="?attr/actionBarSize"
                 android:layout_centerHorizontal="true"
                 android:gravity="center_vertical"
-                android:text="@string/not_available"
+                android:text="@string/positioning"
                 android:textSize="24sp"
                 android:typeface="normal"  />
 

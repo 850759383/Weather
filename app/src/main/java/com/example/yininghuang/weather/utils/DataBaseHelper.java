@@ -25,6 +25,8 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
+        db.execSQL("DROP TABLE saved");
+        db.execSQL("DROP TABLE auto_location");
+        onCreate(db);
     }
 }
