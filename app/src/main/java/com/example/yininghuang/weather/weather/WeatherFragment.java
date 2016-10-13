@@ -22,6 +22,8 @@ import com.example.yininghuang.weather.utils.SharedPreferenceHelper;
 
 import java.util.Date;
 
+import javax.inject.Inject;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -79,7 +81,8 @@ public class WeatherFragment extends Fragment implements WeatherContract.View {
     @BindView(R.id.date3Temp)
     TextView forecastTemp3;
 
-    private WeatherPresenter presenter;
+    @Inject
+    WeatherPresenter presenter;
     private Boolean isRefresh = false;
     private long updateTime = -1;
     private Boolean isAutoLocation = false;
@@ -96,15 +99,7 @@ public class WeatherFragment extends Fragment implements WeatherContract.View {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Bundle argument = getArguments();
-        String d = argument.getString("city");
-        String c = null;
-        isAutoLocation = argument.getBoolean("positioning");
-        if (isAutoLocation) {
-            d = SharedPreferenceHelper.getStringPreference(getActivity(), WeatherPresenter.PREFERENCE_DISTRICT);
-            c = SharedPreferenceHelper.getStringPreference(getActivity(), WeatherPresenter.PREFERENCE_CITY);
-        }
-        presenter = new WeatherPresenter(this, getActivity(), DataBaseManager.getInstance(), d, c, isAutoLocation);
+        presenter = new WeatherPresenter(this, getActivity(), DataBaseManager.getInstance());
     }
 
     @Override
@@ -133,7 +128,15 @@ public class WeatherFragment extends Fragment implements WeatherContract.View {
                 mSwipeLayout.setRefreshing(false);
             }
         });
-        presenter.init();
+        Bundle argument = getArguments();
+        String d = argument.getString("city");
+        String c = null;
+        isAutoLocation = argument.getBoolean("positioning");
+        if (isAutoLocation) {
+            d = SharedPreferenceHelper.getStringPreference(getActivity(), WeatherPresenter.PREFERENCE_DISTRICT);
+            c = SharedPreferenceHelper.getStringPreference(getActivity(), WeatherPresenter.PREFERENCE_CITY);
+        }
+        presenter.init(d, c, isAutoLocation);
     }
 
     @Override

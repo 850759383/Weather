@@ -10,7 +10,7 @@ public class WeatherContract {
 
     interface Presenter {
 
-        void init();
+        void init(String district, String city, Boolean isAutoLocation);
 
         void update();
 

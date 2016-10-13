@@ -28,6 +28,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
 import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -62,26 +64,28 @@ public class WeatherPresenter implements WeatherContract.Presenter, LocationList
     private static final long MAX_POSITION_INTERVAL = 1000 * 8;
     private static final long UPDATE_TIME_INTERVAL = 1000 * 60 * 60;
 
-    public WeatherPresenter(WeatherContract.View weatherView, Context context, DataBaseManager dataBaseManager, String district, String city, Boolean isAutoLocation) {
+    @Inject
+    public WeatherPresenter(WeatherContract.View weatherView, Context context, DataBaseManager dataBaseManager) {
         this.mWeatherView = weatherView;
-        this.context = context.getApplicationContext();
         this.mDataBaseManager = dataBaseManager;
+        this.context = context.getApplicationContext();
+        this.mLocationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+    }
+
+    @Override
+    public void init(String district, String city, Boolean isAutoLocation) {
         this.isAutoLocation = isAutoLocation;
-        this.district = formatCityName(district);
         this.city = city;
-        mLocationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        this.district = formatCityName(district);
         if (isAutoLocation)
             tableName = DataBaseManager.TABLE_AUTO_LOCATION;
         else
             tableName = DataBaseManager.TABLE_SAVED;
-    }
 
-    @Override
-    public void init() {
-        City city = queryFromDB();
-        if (city != null) {
-            mWeather = new Gson().fromJson(city.getWeather(), WeatherList.Weather.class);
-            mWeatherView.updateWeather(mWeather, city.getUpdateTime());
+        City cache = queryFromDB();
+        if (cache != null) {
+            mWeather = new Gson().fromJson(cache.getWeather(), WeatherList.Weather.class);
+            mWeatherView.updateWeather(mWeather, cache.getUpdateTime());
         }
         update();
     }
@@ -104,12 +108,12 @@ public class WeatherPresenter implements WeatherContract.Presenter, LocationList
         positionTimer = Observable.timer(MAX_POSITION_INTERVAL, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<Long>() {
-                        @Override
-                        public void call(Long aLong) {
-                            if (checkPermission())
-                                onLocationChanged(mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER));
-                        }
-                    });
+                    @Override
+                    public void call(Long aLong) {
+                        if (checkPermission())
+                            onLocationChanged(mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER));
+                    }
+                });
     }
 
     private void fetchWeather() {
@@ -250,7 +254,7 @@ public class WeatherPresenter implements WeatherContract.Presenter, LocationList
     private Boolean shouldUpdate() {
         return mWeather == null ||
                 System.currentTimeMillis() - DateUtils.getTime(mWeather.getBasicCityInfo().getUpdateTime().getLocalTime()).getTime() > UPDATE_TIME_INTERVAL;
-        
+
     }
 
     private Boolean checkPermission() {
