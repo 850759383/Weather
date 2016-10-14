@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -23,11 +24,14 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.example.yininghuang.weather.AppModule;
 import com.example.yininghuang.weather.R;
 import com.example.yininghuang.weather.model.Weather.WeatherList;
 import com.example.yininghuang.weather.utils.DataBaseManager;
 import com.example.yininghuang.weather.utils.Utils;
 import com.example.yininghuang.weather.weather.WeatherActivity;
+
+import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -50,7 +54,9 @@ public class SearchFragment extends Fragment implements SearchContract.View, Sea
     @BindView(R.id.swipeRefreshLayout)
     SwipeRefreshLayout mSwipeLayout;
 
-    private SearchPresenter mPresenter;
+    @Inject SearchPresenter mPresenter;
+
+    private View mRootView;
     private SearchResultAdapter mAdapter;
 
     public static SearchFragment newInstance() {
@@ -60,9 +66,9 @@ public class SearchFragment extends Fragment implements SearchContract.View, Sea
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_search, container, false);
-        ButterKnife.bind(this, rootView);
-        return rootView;
+        mRootView = inflater.inflate(R.layout.fragment_search, container, false);
+        ButterKnife.bind(this, mRootView);
+        return mRootView;
     }
 
     @Override
@@ -77,16 +83,24 @@ public class SearchFragment extends Fragment implements SearchContract.View, Sea
     }
 
     private void initView() {
+        DaggerSearchComponent.builder()
+                .searchPresenterModule(new SearchPresenterModule(this))
+                .appModule(new AppModule(getActivity()))
+                .build()
+                .inject(this);
+
         ((SearchActivity) getActivity()).setSupportActionBar(mToolbar);
-        ((SearchActivity) getActivity()).getSupportActionBar().setDefaultDisplayHomeAsUpEnabled(true);
-        ((SearchActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        ActionBar actionBar = ((SearchActivity) getActivity()).getSupportActionBar();
+        if (actionBar != null){
+            actionBar.setDefaultDisplayHomeAsUpEnabled(true);
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
         mSwipeLayout.setEnabled(false);
         setHasOptionsMenu(true);
         mAdapter = new SearchResultAdapter(getActivity());
         mAdapter.setOnItemClickListener(this);
         mResultRec.setLayoutManager(new LinearLayoutManager(getActivity()));
         mResultRec.setAdapter(mAdapter);
-        mPresenter = new SearchPresenter(this, DataBaseManager.getInstance());
         mSearchEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -125,7 +139,7 @@ public class SearchFragment extends Fragment implements SearchContract.View, Sea
         if (!TextUtils.isEmpty(city) && !mSwipeLayout.isRefreshing()) {
             mPresenter.search(city);
             InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(getView().getWindowToken(), 0);
+            imm.hideSoftInputFromWindow(mRootView.getWindowToken(), 0);
         }
     }
 
@@ -140,7 +154,7 @@ public class SearchFragment extends Fragment implements SearchContract.View, Sea
         if (weather != null)
             mAdapter.addWeather(weather);
         else
-            Snackbar.make(getView(), R.string.city_not_found, Snackbar.LENGTH_SHORT).show();
+            Snackbar.make(mRootView, R.string.city_not_found, Snackbar.LENGTH_SHORT).show();
     }
 
     @Override

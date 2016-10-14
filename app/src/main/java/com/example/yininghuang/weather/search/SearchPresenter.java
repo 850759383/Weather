@@ -8,6 +8,8 @@ import com.example.yininghuang.weather.net.WeatherService;
 import com.example.yininghuang.weather.utils.DataBaseManager;
 import com.google.gson.Gson;
 
+import javax.inject.Inject;
+
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
@@ -23,16 +25,19 @@ public class SearchPresenter implements SearchContract.Presenter {
     private Subscription mSubscription;
     private SearchContract.View mSearchView;
     private DataBaseManager mDataBaseManager;
+    private RetrofitHelper mRetrofitHelper;
 
-    public SearchPresenter(SearchContract.View searchView, DataBaseManager dataBaseManager) {
+    @Inject
+    public SearchPresenter(SearchContract.View searchView, DataBaseManager dataBaseManager, RetrofitHelper retrofitHelper) {
         this.mSearchView = searchView;
         this.mDataBaseManager = dataBaseManager;
+        this.mRetrofitHelper = retrofitHelper;
     }
 
     @Override
     public void search(String city) {
         mSearchView.setRefreshStatus(true);
-        mSubscription = RetrofitHelper.createRetrofit(WeatherService.class, Constants.WEATHER_BASE_URL)
+        mSubscription = mRetrofitHelper.createRetrofit(WeatherService.class, Constants.WEATHER_BASE_URL)
                 .getWeatherWithName(city, Constants.WEATHER_KEY)
                 .map(new Func1<WeatherList, WeatherList.Weather>() {
                     @Override

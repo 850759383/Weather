@@ -51,6 +51,7 @@ public class WeatherPresenter implements WeatherContract.Presenter, LocationList
     private LocationManager mLocationManager;
     private WeatherList.Weather mWeather;
     private DataBaseManager mDataBaseManager;
+    private RetrofitHelper mRetrofitHelper;
     private Boolean isAutoLocation = true;
     private SubscriptionList subscriptionList = new SubscriptionList();
     private Subscription positionTimer;
@@ -65,10 +66,11 @@ public class WeatherPresenter implements WeatherContract.Presenter, LocationList
     private static final long UPDATE_TIME_INTERVAL = 1000 * 60 * 60;
 
     @Inject
-    public WeatherPresenter(WeatherContract.View weatherView, Context context, DataBaseManager dataBaseManager) {
+    public WeatherPresenter(WeatherContract.View weatherView, Context context, DataBaseManager dataBaseManager, RetrofitHelper retrofitHelper) {
         this.mWeatherView = weatherView;
         this.mDataBaseManager = dataBaseManager;
         this.context = context.getApplicationContext();
+        this.mRetrofitHelper = retrofitHelper;
         this.mLocationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
     }
 
@@ -158,7 +160,7 @@ public class WeatherPresenter implements WeatherContract.Presenter, LocationList
     }
 
     private Observable<WeatherList.Weather> getWeatherObservable(String cityName) {
-        return RetrofitHelper.createRetrofit(WeatherService.class, Constants.WEATHER_BASE_URL)
+        return mRetrofitHelper.createRetrofit(WeatherService.class, Constants.WEATHER_BASE_URL)
                 .getWeatherWithName(cityName, Constants.WEATHER_KEY)
                 .map(new Func1<WeatherList, WeatherList.Weather>() {
                     @Override
@@ -229,7 +231,7 @@ public class WeatherPresenter implements WeatherContract.Presenter, LocationList
     private Observable<AMapGeoCode> analysisLocation(Location location) {
         Double lng = location.getLongitude();
         Double lat = location.getLatitude();
-        return RetrofitHelper.createRetrofit(LocationAnalysisService.class, Constants.AMAP_BASE_URL)
+        return mRetrofitHelper.createRetrofit(LocationAnalysisService.class, Constants.AMAP_BASE_URL)
                 .analysis(Constants.AMAP_KEY, lng.toString() + "," + lat)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());

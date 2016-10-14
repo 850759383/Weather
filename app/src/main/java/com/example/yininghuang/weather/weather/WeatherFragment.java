@@ -12,6 +12,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.yininghuang.weather.AppModule;
 import com.example.yininghuang.weather.R;
 import com.example.yininghuang.weather.model.Weather.DailyForecast;
 import com.example.yininghuang.weather.model.Weather.WeatherList;
@@ -81,8 +82,8 @@ public class WeatherFragment extends Fragment implements WeatherContract.View {
     @BindView(R.id.date3Temp)
     TextView forecastTemp3;
 
-    @Inject
-    WeatherPresenter presenter;
+    @Inject WeatherPresenter presenter;
+
     private Boolean isRefresh = false;
     private long updateTime = -1;
     private Boolean isAutoLocation = false;
@@ -99,7 +100,12 @@ public class WeatherFragment extends Fragment implements WeatherContract.View {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        presenter = new WeatherPresenter(this, getActivity(), DataBaseManager.getInstance());
+
+        DaggerWeatherComponent.builder()
+                .weatherPresenterModule(new WeatherPresenterModule(this))
+                .appModule(new AppModule(getActivity()))
+                .build()
+                .inject(this);
     }
 
     @Override
@@ -116,10 +122,6 @@ public class WeatherFragment extends Fragment implements WeatherContract.View {
     }
 
     private void initView() {
-        if (isAutoLocation)
-            mLocationOnIcon.setVisibility(View.VISIBLE);
-        else
-            mLocationOnIcon.setVisibility(View.GONE);
         mSwipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -133,8 +135,11 @@ public class WeatherFragment extends Fragment implements WeatherContract.View {
         String c = null;
         isAutoLocation = argument.getBoolean("positioning");
         if (isAutoLocation) {
+            mLocationOnIcon.setVisibility(View.VISIBLE);
             d = SharedPreferenceHelper.getStringPreference(getActivity(), WeatherPresenter.PREFERENCE_DISTRICT);
             c = SharedPreferenceHelper.getStringPreference(getActivity(), WeatherPresenter.PREFERENCE_CITY);
+        } else {
+            mLocationOnIcon.setVisibility(View.GONE);
         }
         presenter.init(d, c, isAutoLocation);
     }
@@ -153,15 +158,15 @@ public class WeatherFragment extends Fragment implements WeatherContract.View {
         mFeelTempTextView.setText(getString(R.string.feel_temp, weather.getNowWeather().getFeelTemperature()));
         mHumidityTextView.setText(getString(R.string.percent, weather.getNowWeather().getHumidity()));
         mWindSpeedTextView.setText(getString(R.string.km_per_hour, weather.getNowWeather().getWind().getSpeed()));
-        if (weather.getBasicCityInfo().getCountry().equals("中国")) {
-            mAirQualityTextView.setText(weather.getAirQuality().getCity().getQlty());
-        } else {
-            mAirQualityTextView.setText(getString(R.string.not_available));
-        }
-        if (isAutoLocation) {
-            ((WeatherActivity) getActivity()).updateDrawerRec();
-        }
         setUpDailyForeCast(weather);
+
+        if (weather.getBasicCityInfo().getCountry().equals("中国"))
+            mAirQualityTextView.setText(weather.getAirQuality().getCity().getQlty());
+        else
+            mAirQualityTextView.setText(getString(R.string.not_available));
+
+        if (isAutoLocation)
+            ((WeatherActivity) getActivity()).updateDrawerRec();
     }
 
     private void setUpDailyForeCast(WeatherList.Weather weather) {

@@ -13,7 +13,19 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitHelper {
 
-    public static <T> T createRetrofit(Class<T> retrofitInterface, String baseUrl) {
+    private static RetrofitHelper INSTANCE;
+
+    private RetrofitHelper(){
+
+    }
+
+    public static RetrofitHelper getInstance(){
+        if (INSTANCE == null)
+            INSTANCE = new RetrofitHelper();
+        return INSTANCE;
+    }
+
+    public <T> T createRetrofit(Class<T> retrofitInterface, String baseUrl) {
         return new Retrofit.Builder()
                 .baseUrl(baseUrl)
                 .addConverterFactory(GsonConverterFactory.create())
@@ -22,7 +34,7 @@ public class RetrofitHelper {
                 .build().create(retrofitInterface);
     }
 
-    public static OkHttpClient createClient() {
+    public OkHttpClient createClient() {
         return new OkHttpClient.Builder()
                 .connectTimeout(10, TimeUnit.SECONDS)
                 .build();

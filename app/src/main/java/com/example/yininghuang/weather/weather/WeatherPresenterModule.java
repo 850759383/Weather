@@ -1,9 +1,6 @@
 package com.example.yininghuang.weather.weather;
 
 import android.content.Context;
-import android.location.LocationManager;
-
-import com.example.yininghuang.weather.utils.DataBaseManager;
 
 import dagger.Module;
 import dagger.Provides;
@@ -15,22 +12,10 @@ import dagger.Provides;
 @Module
 public class WeatherPresenterModule {
 
-    private final Context mContext;
     private final WeatherContract.View mView;
 
-    public WeatherPresenterModule(WeatherContract.View view, Context context) {
+    public WeatherPresenterModule(WeatherContract.View view) {
         mView = view;
-        mContext = context;
-    }
-
-    @Provides
-    LocationManager provideLocationManager() {
-        return (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
-    }
-
-    @Provides
-    DataBaseManager provideDataBaseManager() {
-        return DataBaseManager.getInstance();
     }
 
     @Provides

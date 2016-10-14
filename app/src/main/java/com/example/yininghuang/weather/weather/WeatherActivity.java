@@ -54,7 +54,8 @@ public class WeatherActivity extends AppCompatActivity implements NavigationAdap
         setContentView(R.layout.activity_weather);
         ButterKnife.bind(this);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        if (getSupportActionBar() != null)
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
         pagerLocation.add(getAutoLocationName("正在定位"));
         pagerLocation.addAll(getSavedCityName());
         recLocation.addAll(pagerLocation);
