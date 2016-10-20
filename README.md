@@ -12,8 +12,7 @@
 ## 关于我
   邮箱：iamyining@yahoo.com</br>
   </br>
-  [知乎主页]((https://www.zhihu.com/people/undefeated/)
-    
+  [知乎主页](https://www.zhihu.com/people/undefeated)
 ## 许可证
 
     Copyright 2016 Yining Huang
